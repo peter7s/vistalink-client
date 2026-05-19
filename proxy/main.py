@@ -1,9 +1,14 @@
 import os
+from pathlib import Path
+
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
 from proxy import schemas, metrics
+
+FRONTEND_INDEX = Path(__file__).resolve().parents[1] / "frontend" / "index.html"
 
 # Auto-load .env from the project root so VL_API_KEY / VL_MODE / etc. just work.
 load_dotenv()
@@ -75,3 +80,8 @@ async def call(payload: dict):
 @app.get("/stats")
 def stats():
     return metrics.rollup()
+
+
+@app.get("/", include_in_schema=False)
+def frontend():
+    return FileResponse(FRONTEND_INDEX)

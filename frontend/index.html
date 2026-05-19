@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VistaLink Reference Client</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #fafafa;
+      color: #1a1a1a;
+      line-height: 1.5;
+    }
+    header {
+      background: #fff;
+      border-bottom: 1px solid #e5e5e5;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+    header h1 { font-size: 1.1rem; font-weight: 600; }
+    header h1 span { color: #888; font-weight: 400; }
+    nav { display: flex; gap: 0.25rem; }
+    nav button {
+      padding: 0.5rem 1rem;
+      background: none;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: #555;
+    }
+    nav button:hover { background: #f0f0f0; }
+    nav button.active { background: #1a1a1a; color: #fff; }
+    main { max-width: 1200px; margin: 2rem auto; padding: 0 2rem; }
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* Forms */
+    form { background: #fff; padding: 1.5rem; border-radius: 8px; border: 1px solid #e5e5e5; margin-bottom: 1.5rem; }
+    .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; margin-bottom: 0.75rem; }
+    label { display: block; font-size: 0.8rem; color: #666; margin-bottom: 0.25rem; }
+    input, textarea {
+      width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #d4d4d4; border-radius: 6px;
+      font-size: 0.9rem; font-family: inherit;
+    }
+    input:focus, textarea:focus { outline: none; border-color: #1a1a1a; }
+    button.submit {
+      padding: 0.6rem 1.5rem; background: #1a1a1a; color: #fff; border: none; border-radius: 6px;
+      cursor: pointer; font-size: 0.9rem; font-weight: 500;
+    }
+    button.submit:hover { background: #333; }
+    button.submit:disabled { background: #999; cursor: wait; }
+
+    /* Cards */
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+    .card {
+      background: #fff; border-radius: 8px; overflow: hidden; border: 1px solid #e5e5e5;
+      cursor: pointer; transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .card img { width: 100%; height: 160px; object-fit: cover; background: #eee; }
+    .card-body { padding: 0.75rem 1rem 1rem; }
+    .card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.25rem; }
+    .card .city { font-size: 0.8rem; color: #666; margin-bottom: 0.5rem; }
+    .card .ratings { display: flex; gap: 1rem; font-size: 0.8rem; margin-bottom: 0.5rem; }
+    .card .ratings span { color: #555; }
+    .card .desc { font-size: 0.8rem; color: #555; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .card .type { display: inline-block; margin-top: 0.5rem; font-size: 0.7rem; padding: 0.15rem 0.5rem; background: #f0f0f0; border-radius: 4px; color: #555; }
+
+    /* Chat */
+    .chat-message {
+      background: #fff; padding: 1.25rem; border-radius: 8px; border: 1px solid #e5e5e5;
+      margin-bottom: 1rem; white-space: pre-wrap; line-height: 1.6;
+    }
+    .hotel-ref {
+      display: inline-block; padding: 0.1rem 0.5rem; margin: 0 0.15rem;
+      background: #e8f0fe; color: #1967d2; border-radius: 4px;
+      font-size: 0.85rem; cursor: pointer; text-decoration: none;
+    }
+    .hotel-ref:hover { background: #d2e3fc; }
+    .meta { font-size: 0.8rem; color: #888; margin-top: 1rem; }
+
+    /* Details */
+    .detail-header { background: #fff; padding: 2rem; border-radius: 8px; border: 1px solid #e5e5e5; margin-bottom: 1rem; }
+    .detail-header h2 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .detail-header .meta-row { display: flex; gap: 1.5rem; font-size: 0.9rem; color: #555; margin-bottom: 1rem; }
+    .detail-header p { color: #444; }
+    .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.5rem; margin-bottom: 1rem; }
+    .gallery img { width: 100%; height: 150px; object-fit: cover; border-radius: 6px; }
+    .detail-section { background: #fff; padding: 1.5rem; border-radius: 8px; border: 1px solid #e5e5e5; margin-bottom: 1rem; }
+    .detail-section h3 { font-size: 1rem; margin-bottom: 0.75rem; color: #555; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+    .detail-section ul { list-style: none; }
+    .detail-section li { padding: 0.5rem 0; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
+    .detail-section li:last-child { border: none; }
+
+    /* States */
+    .empty { padding: 3rem; text-align: center; color: #888; font-size: 0.9rem; }
+    .error { background: #fef2f2; border: 1px solid #fecaca; padding: 1rem; border-radius: 8px; color: #991b1b; font-size: 0.9rem; }
+    .error code { background: rgba(0,0,0,0.05); padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.85rem; }
+    .loading { padding: 2rem; text-align: center; color: #888; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Quietly <span>Reference Client</span></h1>
+    <nav>
+      <button data-tab="search" class="active">Search</button>
+      <button data-tab="chat">Chat</button>
+      <button data-tab="details">Details</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- SEARCH VIEW -->
+    <section id="search-view" class="view active">
+      <form id="search-form">
+        <div class="form-row">
+          <div><label>City</label><input name="city" value="Paris" required></div>
+          <div><label>Check-in (YYYY-MM-DD)</label><input name="check_in" placeholder="2026-06-15"></div>
+          <div><label>Check-out (YYYY-MM-DD)</label><input name="check_out" placeholder="2026-06-18"></div>
+          <div><label>Guests</label><input name="guests" type="number" min="1"></div>
+          <div><label>Budget min (€)</label><input name="budget_min" type="number" min="0"></div>
+          <div><label>Budget max (€)</label><input name="budget_max" type="number" min="0"></div>
+          <div><label>Limit</label><input name="limit" type="number" value="6" min="1" max="50"></div>
+        </div>
+        <button type="submit" class="submit">Search</button>
+      </form>
+      <div id="search-results"></div>
+    </section>
+
+    <!-- CHAT VIEW -->
+    <section id="chat-view" class="view">
+      <form id="chat-form">
+        <label>Message</label>
+        <textarea name="message" rows="3" placeholder="e.g. cozy boutique hotel in Paris under 300 per night" required></textarea>
+        <p style="font-size:0.75rem; color:#888; margin: 0.5rem 0 1rem;">Chat takes ~15–20s (LLM inference) and costs $0.03 per call.</p>
+        <button type="submit" class="submit">Send</button>
+      </form>
+      <div id="chat-results"></div>
+    </section>
+
+    <!-- DETAILS VIEW -->
+    <section id="details-view" class="view">
+      <form id="details-form">
+        <label>Hotel ID</label>
+        <input name="hotel_id" placeholder="2e47f4d9-79a6-4a43-a2b6-0b6c803c416f" required>
+        <button type="submit" class="submit" style="margin-top:0.75rem;">Load</button>
+      </form>
+      <div id="details-results"></div>
+    </section>
+  </main>
+
+  <script>
+    // --- Tab navigation ---
+    document.querySelectorAll('nav button').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+    function switchTab(tab) {
+      document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+      document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === `${tab}-view`));
+    }
+
+    // --- API call helper ---
+    async function api(path, opts = {}) {
+      const r = await fetch(path, opts);
+      if (!r.ok) throw { status: r.status, body: await r.text() };
+      return r.json();
+    }
+
+    // --- Search ---
+    document.getElementById('search-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button');
+      btn.disabled = true;
+      const out = document.getElementById('search-results');
+      out.innerHTML = '<div class="loading">Searching…</div>';
+      const data = Object.fromEntries(new FormData(e.target));
+      const payload = {};
+      for (const [k, v] of Object.entries(data)) {
+        if (v === '') continue;
+        payload[k] = ['guests','rooms','budget_min','budget_max','limit'].includes(k) ? Number(v) : v;
+      }
+      try {
+        const body = await api('/search', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        renderHotels(out, body.hotels || [], body.total);
+      } catch (err) { out.innerHTML = renderError(err); }
+      finally { btn.disabled = false; }
+    });
+
+    function renderHotels(container, hotels, total) {
+      if (!hotels.length) { container.innerHTML = '<div class="empty">No hotels found.</div>'; return; }
+      const cards = hotels.map(h => {
+        const img = (h.images && h.images[0]) ? h.images[0].url : '';
+        const star = h.star_rating ? `★ ${h.star_rating}` : '';
+        const review = h.review_score ? `${h.review_score}/10 · ${h.review_count || '?'} reviews` : '';
+        return `
+          <div class="card" data-id="${h.hotel_id}">
+            ${img ? `<img src="${img}" alt="" loading="lazy">` : ''}
+            <div class="card-body">
+              <h3>${escapeHtml(h.name)}</h3>
+              <div class="city">${escapeHtml(h.city || '')}${h.country ? `, ${escapeHtml(h.country)}` : ''}</div>
+              <div class="ratings">${star ? `<span>${star}</span>` : ''}${review ? `<span>${review}</span>` : ''}</div>
+              <div class="desc">${escapeHtml(h.description || '')}</div>
+              ${h.hotel_type ? `<span class="type">${escapeHtml(h.hotel_type)}</span>` : ''}
+            </div>
+          </div>`;
+      }).join('');
+      container.innerHTML = `<div class="cards">${cards}</div>${total ? `<p class="meta">Total available: ${total}</p>` : ''}`;
+      container.querySelectorAll('.card').forEach(c => c.addEventListener('click', () => loadDetails(c.dataset.id)));
+    }
+
+    // --- Chat ---
+    document.getElementById('chat-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button');
+      btn.disabled = true;
+      const out = document.getElementById('chat-results');
+      out.innerHTML = '<div class="loading">Asking VistaLink (this takes ~15-20s)…</div>';
+      const message = new FormData(e.target).get('message');
+      try {
+        const body = await api('/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message }) });
+        const formatted = formatChatMessage(body.message || '');
+        out.innerHTML = `
+          <div class="chat-message">${formatted}</div>
+          ${body.session_id ? `<p class="meta">session_id: ${body.session_id}</p>` : ''}
+        `;
+        out.querySelectorAll('.hotel-ref').forEach(a => a.addEventListener('click', (ev) => {
+          ev.preventDefault();
+          loadDetails(a.dataset.id);
+        }));
+      } catch (err) { out.innerHTML = renderError(err); }
+      finally { btn.disabled = false; }
+    });
+
+    function formatChatMessage(msg) {
+      // Replace <!--hotel:UUID--> with clickable pills, escape the rest.
+      const parts = [];
+      const re = /<!--hotel:([^>]+)-->/g;
+      let last = 0, m;
+      while ((m = re.exec(msg)) !== null) {
+        parts.push(escapeHtml(msg.slice(last, m.index)));
+        parts.push(`<a class="hotel-ref" data-id="${m[1]}" href="#">hotel ${m[1].slice(0, 8)}…</a>`);
+        last = m.index + m[0].length;
+      }
+      parts.push(escapeHtml(msg.slice(last)));
+      // Render basic markdown bold (**text**) — chat responses use it heavily.
+      return parts.join('').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    }
+
+    // --- Details ---
+    document.getElementById('details-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = new FormData(e.target).get('hotel_id').trim();
+      loadDetails(id);
+    });
+
+    async function loadDetails(hotel_id) {
+      switchTab('details');
+      document.querySelector('#details-form input[name=hotel_id]').value = hotel_id;
+      const out = document.getElementById('details-results');
+      out.innerHTML = '<div class="loading">Loading…</div>';
+      try {
+        const body = await api(`/details/${encodeURIComponent(hotel_id)}`);
+        if (body.error) {
+          out.innerHTML = renderError({ status: body.error.status_code, body: body.error.body_preview }, 'VistaLink upstream returned an error.');
+          return;
+        }
+        renderDetails(out, body);
+      } catch (err) { out.innerHTML = renderError(err); }
+    }
+
+    function renderDetails(container, h) {
+      const images = (h.images || []).slice(0, 12).map(i => `<img src="${i.url}" alt="${escapeHtml(i.label || '')}" loading="lazy">`).join('');
+      const star = h.star_rating ? `<span>★ ${h.star_rating}</span>` : '';
+      const review = h.review_score ? `<span>${h.review_score}/10</span>` : '';
+      const phone = h.phone ? `<span>📞 ${escapeHtml(h.phone)}</span>` : '';
+      const website = h.website_url ? `<span><a href="${h.website_url}" target="_blank" rel="noopener">${escapeHtml(h.website_url)}</a></span>` : '';
+      const amenities = (h.amenities || []).length ? `<div class="detail-section"><h3>Amenities</h3><ul>${h.amenities.map(a => `<li>${escapeHtml(a)}</li>`).join('')}</ul></div>` : '';
+      const rooms = (h.rooms || []).length ? `<div class="detail-section"><h3>Rooms</h3><ul>${h.rooms.map(r => `<li><strong>${escapeHtml(r.name || '')}</strong>${r.description ? ` — ${escapeHtml(r.description)}` : ''}</li>`).join('')}</ul></div>` : '';
+      const reviews = (h.reviews || []).length ? `<div class="detail-section"><h3>Reviews</h3><ul>${h.reviews.map(r => `<li><strong>${escapeHtml(r.author || '')}</strong> (${r.rating || '?'}/5): ${escapeHtml(r.text || '')}</li>`).join('')}</ul></div>` : '';
+      container.innerHTML = `
+        <div class="detail-header">
+          <h2>${escapeHtml(h.name)}</h2>
+          <div class="meta-row">
+            ${star}${review}
+            <span>${escapeHtml(h.city || '')}${h.country ? `, ${escapeHtml(h.country)}` : ''}</span>
+            ${phone}${website}
+          </div>
+          <p>${escapeHtml(h.description || '')}</p>
+        </div>
+        ${images ? `<div class="gallery">${images}</div>` : ''}
+        ${amenities}${rooms}${reviews}
+      `;
+    }
+
+    function renderError(err, prefix = '') {
+      const status = err.status || '?';
+      const body = typeof err.body === 'string' ? err.body.slice(0, 300) : JSON.stringify(err.body || err).slice(0, 300);
+      return `<div class="error">${prefix ? `<strong>${escapeHtml(prefix)}</strong><br>` : ''}HTTP ${status}: <code>${escapeHtml(body)}</code></div>`;
+    }
+
+    function escapeHtml(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+    }
+  </script>
+</body>
+</html>
