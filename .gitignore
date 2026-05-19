@@ -27,3 +27,6 @@ logs/*.jsonl
 
 # Claude Code per-user settings
 .claude/settings.local.json
+
+# Internal docs (drafts, feedback notes, etc. — kept local, shared via Slack)
+docs/
