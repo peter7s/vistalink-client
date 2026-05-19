@@ -188,14 +188,33 @@ class Reference(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
+class ChatSegment(BaseModel):
+    """Structured rendering chunk seen on parley.vistalink.com responses
+    (not yet exposed via public /v1/chat). Alternates 'text' and 'hotel_ref'
+    so clients can render inline hotel cards instead of parsing <!--hotel:UUID--> markers."""
+    type: str  # "text" | "hotel_ref" (open-ended for future segment types)
+    id: Optional[str] = None
+    content: Optional[str] = None        # populated when type == "text"
+    hotel_id: Optional[str] = None       # populated when type == "hotel_ref"
+    label_preference: Optional[str] = None
+    model_config = ConfigDict(extra="allow")
+
+
 class ChatResponse(BaseModel):
     """VistaLink /v1/chat. Per docs (https://vistalink.com/developers#tool-ref), `hotels`
     should contain slim candidate records like {hotel_id, name, price:{min, currency}}.
     In practice (observed 2026-05-19) it returns as []. Prose in `message` contains
-    inline `<!--hotel:UUID-->` markers as a fallback signal. See docs/vistalink-chat-image-gap.md."""
+    inline `<!--hotel:UUID-->` markers as a fallback signal. See docs/vistalink-chat-image-gap.md.
+
+    Fields aliased from parley.vistalink.com's internal response shape (`hotels_core`,
+    `hotel_ids`, `segments`) are included as forward-compat: VistaLink already produces
+    this data internally and may expose it publicly; clients can render today if so."""
     session_id: Optional[str] = None
     message: Optional[str] = None
     hotels: list[Hotel] = []
+    hotels_core: list[Hotel] = []      # alias seen on parley.vistalink.com
+    hotel_ids: list[str] = []          # convenience: matches segments[].hotel_id
+    segments: list[ChatSegment] = []   # structured text/hotel_ref chunks for inline rendering
     clarification_pending: Optional[Clarification] = None
     references: list[Reference] = []   # Web sources when the engine used live search
     pois: list[dict] = []              # Points of interest (shape not specified in docs)

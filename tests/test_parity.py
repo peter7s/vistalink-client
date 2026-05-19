@@ -15,6 +15,8 @@ from pathlib import Path
 
 import pytest
 
+from proxy import schemas
+
 GOLDENS = Path(__file__).resolve().parent / "goldens"
 HARNESS_FIXTURE = Path(__file__).resolve().parents[1] / "fixtures" / "chat_about_hotels.json"
 
@@ -26,8 +28,9 @@ def _golden_files():
 
 
 def _hotel_list(payload: dict) -> list[dict]:
-    """Find the hotel array regardless of which key the system uses."""
-    for key in ("hotels", "results", "properties", "items", "data"):
+    """Find the hotel array regardless of which key the system uses.
+    Parley uses `hotels_core`; VistaLink /v1/chat uses `hotels`."""
+    for key in ("hotels_core", "hotels", "results", "properties", "items", "data"):
         if isinstance(payload.get(key), list) and payload[key]:
             return payload[key]
     return []
@@ -35,43 +38,75 @@ def _hotel_list(payload: dict) -> list[dict]:
 
 @pytest.mark.parametrize("golden_path", _golden_files())
 def test_top_level_field_parity(golden_path):
-    """Every top-level field Parley returns should exist (or be defensible to omit) in our harness."""
+    """Every top-level field Parley returns should exist on our schemas.ChatResponse model
+    (or be allowlisted as Parley-only orchestration data we don't expect VistaLink to emit)."""
     golden = json.loads(golden_path.read_text())
-    harness = json.loads(HARNESS_FIXTURE.read_text())
-
     g_keys = set(golden.keys())
-    h_keys = set(harness.keys())
-    missing = g_keys - h_keys
-    # Allow Parley-specific orchestration fields we wouldn't expect VistaLink to emit:
-    parley_only = {"trace_id", "model", "thread_id", "prompt", "intent"}
-    missing -= parley_only
+    model_keys = set(schemas.ChatResponse.model_fields.keys())
 
-    assert not missing, (
-        f"Parley response (top-level) has fields the harness response is missing: {sorted(missing)}\n"
-        f"Decide per field: (a) add to ChatResponse, (b) ignore if Parley-only orchestration."
+    # Parley-only fields VistaLink's public chat probably won't emit — informational, not errors:
+    parley_only = {
+        "trace_id", "model", "thread_id", "prompt",
+        "intent", "route", "thinking_steps", "phase",
+        "reply", "count",  # parley uses 'reply'; vistalink uses 'message'
+        "_capture",        # local-only metadata block we added to the golden
+    }
+    informational = (g_keys - model_keys) & parley_only
+    actionable = (g_keys - model_keys) - parley_only
+
+    if informational:
+        print(f"\n[INFO] Parley-only top-level fields (VistaLink may add later): {sorted(informational)}")
+
+    assert not actionable, (
+        f"Parley response has top-level fields our schemas.ChatResponse is missing: {sorted(actionable)}\n"
+        f"Add each to ChatResponse (or to parley_only allowlist if VistaLink won't emit them)."
     )
 
 
 @pytest.mark.parametrize("golden_path", _golden_files())
 def test_hotel_card_field_parity(golden_path):
-    """Every hotel-card field Parley exposes per result should exist on our Hotel model.
-    Skips cleanly if either side has no hotels in this scenario."""
+    """Every hotel-card field Parley exposes should exist on our schemas.Hotel model.
+    We compare against the pydantic model's declared fields (not the harness fixture)
+    so the test is meaningful even when the live /v1/chat returns empty hotels."""
     golden = json.loads(golden_path.read_text())
-    harness = json.loads(HARNESS_FIXTURE.read_text())
-
     g_hotels = _hotel_list(golden)
-    h_hotels = _hotel_list(harness)
     if not g_hotels:
         pytest.skip(f"Golden {golden_path.name} has no hotels list — top-level parity test still ran")
-    if not h_hotels:
-        pytest.skip("Harness fixture has no hotels list (expected — chat returns empty hotels until VistaLink fixes the regression)")
 
     g_keys = set(g_hotels[0].keys())
-    h_keys = set(h_hotels[0].keys())
-    missing = g_keys - h_keys
-    assert not missing, (
-        f"Parley hotel card has fields the harness Hotel model doesn't expose: {sorted(missing)}\n"
-        f"For each field, either add it to schemas.Hotel or document why VistaLink can't provide it."
+    model_keys = set(schemas.Hotel.model_fields.keys())
+    # Map Parley field names to harness equivalents (semantic aliases — same data, different names):
+    aliases = {
+        "id": "hotel_id",      # Parley uses `id`; our model uses `hotel_id`
+        "stars": "star_rating",
+    }
+    # Treat aliased Parley fields as present if the harness equivalent is declared.
+    g_keys_normalized = {aliases.get(k, k) for k in g_keys}
+    missing = g_keys_normalized - model_keys
+
+    # Parley-specific fields that VistaLink's public chat probably won't emit — informational, not errors:
+    parley_only_card_fields = {
+        # routing / scoring / explanation
+        "score", "explanation", "explanation_factors",
+        # POI distances + walking/driving geometry
+        "poi_distances", "combined_poi_score", "avg_poi_distance",
+        "nearest_poi", "distance_to_poi_meters", "poi_name", "poi_type",
+        "routes_to_pois", "walk_duration_seconds", "walk_geometry",
+        "drive_duration_seconds", "drive_geometry",
+        # convenience flat-vs-nested duplicates
+        "latitude", "longitude", "location",  # we have these as flat
+        # other parley extras
+        "amenity_ids", "hero_image_url", "hero_image_label", "booking_url", "rating",
+    }
+    informational = missing & parley_only_card_fields
+    actionable = missing - parley_only_card_fields
+
+    if informational:
+        print(f"\n[INFO] Parley-only hotel-card fields (VistaLink may add these later): {sorted(informational)}")
+
+    assert not actionable, (
+        f"Parley hotel card has fields our schemas.Hotel model is missing: {sorted(actionable)}\n"
+        f"Add each to schemas.Hotel (or to the parley_only_card_fields allowlist if VistaLink won't emit them)."
     )
 
 

@@ -1,0 +1,155 @@
+{
+  "_capture": {
+    "source": "parley.vistalink.com",
+    "captured_at": "2026-05-19",
+    "query": "I want a luxury hotel in Paris for my girlfriend and I, ideally next to the tour eiffel, and that has a spa and a gum we can access. Ideally, breakfast is included and the room very spacious, with a regimental bathroom which includes a bath tub.",
+    "wire_format": "Server-Sent Events (text/event-stream). This file is a synthesized merge of all events for parity testing."
+  },
+  "session_id": "06c7d822-07e4-44c6-a007-3fcef6becb47",
+  "phase": "answer_ready",
+  "intent": "hotel_search",
+  "route": "search_fast_path",
+  "thinking_steps": [
+    {"content": "Searching hotels in Paris near Tour Eiffel", "step_type": "search"},
+    {"content": "Matching hotels to your described experience", "step_type": "thinking"},
+    {"content": "Filtering for: breakfast, spa", "step_type": "search"}
+  ],
+  "hotel_ids": [
+    "e801ad36-20f6-4662-a444-b1cfd24fdd84",
+    "40d90ca6-2c89-4e20-93e5-3a0d594e4cfe",
+    "fd4d2868-3662-4f3d-8a67-7a7069dca1ba",
+    "6117e6d7-8160-4628-8513-a5007507bf3f",
+    "d04b1159-8905-484a-8239-eb90e255f9e1"
+  ],
+  "count": 5,
+  "reply": "Here are some great luxury hotels in Paris for you and your girlfriend:\n\n1. **Hôtel Kleber Paris & Spa** - Guests praise the friendly, helpful, and polite staff... <!--hotel:e801ad36-20f6-4662-a444-b1cfd24fdd84-->\n\n2. **Prince de Galles, a Luxury Collection hotel, Paris** - This hotel is a perfect match... <!--hotel:fd4d2868-3662-4f3d-8a67-7a7069dca1ba-->\n\n[truncated for brevity]",
+  "segments": [
+    {"type": "text", "id": "seg-73ad47a6", "content": "Here are some great luxury hotels in Paris for you and your girlfriend:\n\n1. **Hôtel Kleber Paris & Spa** - ..."},
+    {"type": "hotel_ref", "id": "seg-01ada00f", "hotel_id": "e801ad36-20f6-4662-a444-b1cfd24fdd84", "label_preference": null},
+    {"type": "text", "id": "seg-4fbc430b", "content": "2. **Prince de Galles, a Luxury Collection hotel, Paris** - ..."},
+    {"type": "hotel_ref", "id": "seg-7d493766", "hotel_id": "fd4d2868-3662-4f3d-8a67-7a7069dca1ba", "label_preference": null}
+  ],
+  "pois": [
+    {"name": "Tour Eiffel", "lat": 48.858370099999995, "lng": 2.2944812999999997, "type": "landmark", "address": "Av. Gustave Eiffel, 75007 Paris, France"}
+  ],
+  "hotels_core": [
+    {
+      "id": "e801ad36-20f6-4662-a444-b1cfd24fdd84",
+      "name": "Hôtel Kleber Paris & Spa",
+      "address": null,
+      "city": "Paris",
+      "country": "France",
+      "rating": null,
+      "review_score": 8.6,
+      "review_count": null,
+      "stars": null,
+      "location": {"lat": 48.8687277, "lon": 2.2920845},
+      "latitude": 48.8687277,
+      "longitude": 2.2920845,
+      "amenities": [],
+      "amenity_ids": ["ACTIVITIES_TOURS_RENTAL", "BAR", "BREAKFAST_AVAILABLE", "CONCIERGE", "FITNESS_GYM", "POOL_INDOOR", "WELLNESS_HOT_TUB", "WELLNESS_SAUNA", "WELLNESS_SPA", "WELLNESS_STEAM_ROOM"],
+      "score": 43.37,
+      "images": [
+        {"url": "https://hotel-images.vistalink.com/fr/kleber-paris/amenity/general/8ee97e06b2e3.jpg", "label": "building"},
+        {"url": "https://hotel-images.vistalink.com/fr/kleber-paris/amenity/general/94ab2d6a3a3d.jpg", "label": "building"}
+      ],
+      "hero_image_url": "https://hotel-images.vistalink.com/fr/kleber-paris/amenity/general/8ee97e06b2e3.jpg",
+      "hero_image_label": null,
+      "description": "The Hôtel Kleber Paris & Spa is located in Paris' prestigious Golden Triangle...",
+      "hotel_type": "Independent",
+      "website_url": "https://hotelkleberparis.com",
+      "booking_url": "https://www.booking.com/hotel/fr/kleber-paris.en-gb.html?checkin=2026-03-15&checkout=2026-03-18&group_adults=2",
+      "price": null,
+      "review_highlight": "My recent stay at this hotel was a mixed bag. On the positive side, the interior was lovely...",
+      "explanation": "Strong match to your search, Excellent reviews (8.6/10)",
+      "explanation_factors": {
+        "review": {"factor_type": "review", "value": 0.86, "weight": 0.15, "contribution": 0.129, "human_readable": "Excellent reviews (8.6/10)"},
+        "semantic": {"factor_type": "semantic", "value": 0.839, "weight": 0.4, "contribution": 0.336, "human_readable": "Strong match to your search"}
+      },
+      "guest_insights": {
+        "highlights": ["Guests praise the friendly, helpful, and polite staff."],
+        "aspects": [
+          {"type": "service", "summary": "Guests praise the friendly staff.", "sentiment": 0.98, "quote": "["},
+          {"type": "amenities", "summary": "Guests praise the private spa, sauna, and steam room.", "sentiment": 0.95, "quote": "["},
+          {"type": "location", "summary": "Guests praise the central location.", "sentiment": 0.95, "quote": "["}
+        ]
+      },
+      "poi_distances": {"Tour Eiffel": 1165},
+      "combined_poi_score": 1165,
+      "avg_poi_distance": 1165,
+      "nearest_poi": "Tour Eiffel",
+      "distance_to_poi_meters": 1165,
+      "poi_name": "Tour Eiffel",
+      "poi_type": "landmark",
+      "routes_to_pois": {
+        "Tour Eiffel": {
+          "walk_duration_seconds": 1255,
+          "walk_distance_meters": 1747,
+          "walk_geometry": {"type": "LineString", "coordinates": [[2.292115, 48.868773], [2.291715, 48.868882]]},
+          "drive_duration_seconds": 619,
+          "drive_distance_meters": 2757,
+          "drive_geometry": {"type": "LineString", "coordinates": [[2.292147, 48.868819], [2.291553, 48.868995]]}
+        }
+      },
+      "walk_duration_seconds": 1255,
+      "walk_geometry": {"type": "LineString", "coordinates": [[2.292115, 48.868773], [2.291715, 48.868882]]},
+      "drive_duration_seconds": 619,
+      "drive_geometry": {"type": "LineString", "coordinates": [[2.292147, 48.868819], [2.291553, 48.868995]]}
+    },
+    {
+      "id": "fd4d2868-3662-4f3d-8a67-7a7069dca1ba",
+      "name": "Prince de Galles, a Luxury Collection hotel, Paris",
+      "address": null,
+      "city": "Paris",
+      "country": "France",
+      "rating": null,
+      "review_score": 8.4,
+      "review_count": null,
+      "stars": 5.0,
+      "location": {"lat": 48.869143, "lon": 2.3006579},
+      "latitude": 48.869143,
+      "longitude": 2.3006579,
+      "amenities": [],
+      "amenity_ids": ["BAR", "BREAKFAST_AVAILABLE", "CONCIERGE", "FITNESS_GYM", "RESTAURANT", "VALET_PARKING", "WELLNESS_MASSAGE", "WELLNESS_SPA"],
+      "score": 45.81,
+      "images": [
+        {"url": "https://hotel-images.vistalink.com/fr/princedegalleshotel/room/Art%20Deco%20Super%20King/71dc5a3d2552.jpg", "label": "building"}
+      ],
+      "hero_image_url": "https://hotel-images.vistalink.com/fr/princedegalleshotel/room/Art%20Deco%20Super%20King/71dc5a3d2552.jpg",
+      "hero_image_label": null,
+      "description": "The Prince de Galles, a Luxury Collection Hotel, Paris, has intrigued guests since 1929 with Art Deco chic...",
+      "hotel_type": "Soft Branded",
+      "website_url": "https://www.marriott.com/en-us/hotels/parlc-prince-de-galles/overview/",
+      "booking_url": "https://www.booking.com/hotel/fr/princedegalleshotel.en-gb.html",
+      "price": null,
+      "review_highlight": "I've had the pleasure of staying in some of Paris' finest hotels...",
+      "explanation": "Perfect match to your 'luxury' search, Excellent reviews (8.4/10)",
+      "explanation_factors": {
+        "review": {"factor_type": "review", "value": 0.84, "weight": 0.15, "contribution": 0.126, "human_readable": "Excellent reviews (8.4/10)"},
+        "semantic": {"factor_type": "semantic", "value": 0.944, "weight": 0.4, "contribution": 0.378, "human_readable": "Perfect match to your 'luxury' search"}
+      },
+      "guest_insights": {
+        "highlights": ["Guests praise the hotel's cleanliness and attention to detail."],
+        "aspects": [
+          {"type": "cleanliness", "summary": "Guests praise the hotel's cleanliness.", "sentiment": 0.9, "quote": "["}
+        ]
+      },
+      "poi_distances": {"Tour Eiffel": 1280},
+      "combined_poi_score": 1280,
+      "nearest_poi": "Tour Eiffel",
+      "distance_to_poi_meters": 1280,
+      "poi_name": "Tour Eiffel",
+      "poi_type": "landmark",
+      "routes_to_pois": {
+        "Tour Eiffel": {
+          "walk_duration_seconds": 1203,
+          "walk_distance_meters": 1604,
+          "walk_geometry": {"type": "LineString", "coordinates": [[2.30083, 48.86915]]},
+          "drive_duration_seconds": 458,
+          "drive_distance_meters": 2003,
+          "drive_geometry": {"type": "LineString", "coordinates": [[2.300908, 48.869152]]}
+        }
+      }
+    }
+  ]
+}
