@@ -69,12 +69,18 @@
     .card .ratings span { color: #555; }
     .card .desc { font-size: 0.8rem; color: #555; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .card .type { display: inline-block; margin-top: 0.5rem; font-size: 0.7rem; padding: 0.15rem 0.5rem; background: #f0f0f0; border-radius: 4px; color: #555; }
+    .card .img-wrap { position: relative; }
+    .card .img-count { position: absolute; bottom: 0.5rem; right: 0.5rem; background: rgba(0,0,0,0.65); color: #fff; font-size: 0.7rem; padding: 0.1rem 0.4rem; border-radius: 3px; }
 
     /* Chat */
-    .chat-message {
-      background: #fff; padding: 1.25rem; border-radius: 8px; border: 1px solid #e5e5e5;
-      margin-bottom: 1rem; white-space: pre-wrap; line-height: 1.6;
-    }
+    .chat-thread { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem; }
+    .turn { padding: 0.9rem 1.25rem; border-radius: 8px; line-height: 1.6; white-space: pre-wrap; }
+    .turn.user { background: #1a1a1a; color: #fff; align-self: flex-end; max-width: 75%; }
+    .turn.assistant { background: #fff; border: 1px solid #e5e5e5; color: #1a1a1a; align-self: flex-start; max-width: 90%; }
+    .turn .role-tag { display: block; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.6; margin-bottom: 0.25rem; }
+    .session-bar { background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 0.6rem 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: #666; }
+    .session-bar button { background: #f0f0f0; border: 1px solid #d4d4d4; padding: 0.3rem 0.7rem; border-radius: 5px; cursor: pointer; font-size: 0.8rem; }
+    .session-bar button:hover { background: #e5e5e5; }
     .hotel-ref {
       display: inline-block; padding: 0.1rem 0.5rem; margin: 0 0.15rem;
       background: #e8f0fe; color: #1967d2; border-radius: 4px;
@@ -133,13 +139,17 @@
 
     <!-- CHAT VIEW -->
     <section id="chat-view" class="view">
+      <div id="session-bar" class="session-bar" style="display:none;">
+        <span>session: <code id="session-id"></code></span>
+        <button id="reset-session" type="button">New conversation</button>
+      </div>
+      <div id="chat-thread" class="chat-thread"></div>
       <form id="chat-form">
         <label>Message</label>
         <textarea name="message" rows="3" placeholder="e.g. cozy boutique hotel in Paris under 300 per night" required></textarea>
-        <p style="font-size:0.75rem; color:#888; margin: 0.5rem 0 1rem;">Chat takes ~15–20s (LLM inference) and costs $0.03 per call.</p>
+        <p style="font-size:0.75rem; color:#888; margin: 0.5rem 0 1rem;">Chat takes ~15–20s (LLM inference) and costs $0.03 per call. Multi-turn: each message is sent with the current session_id so VistaLink remembers context.</p>
         <button type="submit" class="submit">Send</button>
       </form>
-      <div id="chat-results"></div>
     </section>
 
     <!-- DETAILS VIEW -->
@@ -192,13 +202,20 @@
 
     function renderHotels(container, hotels, total) {
       if (!hotels.length) { container.innerHTML = '<div class="empty">No hotels found.</div>'; return; }
+      // #5 diagnostic: tally images returned per hotel
+      const imgCounts = hotels.map(h => (h.images || []).length);
+      const withImgs = imgCounts.filter(n => n > 0).length;
+      const avg = imgCounts.reduce((a,b) => a+b, 0) / hotels.length;
+      console.log(`[images] ${hotels.length} hotels, ${withImgs} with images, avg ${avg.toFixed(1)} images each`);
+
       const cards = hotels.map(h => {
-        const img = (h.images && h.images[0]) ? h.images[0].url : '';
+        const imgs = h.images || [];
+        const img = imgs[0] ? imgs[0].url : '';
         const star = h.star_rating ? `★ ${h.star_rating}` : '';
         const review = h.review_score ? `${h.review_score}/10 · ${h.review_count || '?'} reviews` : '';
         return `
           <div class="card" data-id="${h.hotel_id}">
-            ${img ? `<img src="${img}" alt="" loading="lazy">` : ''}
+            ${img ? `<div class="img-wrap"><img src="${img}" alt="" loading="lazy">${imgs.length > 1 ? `<span class="img-count">📷 ${imgs.length}</span>` : ''}</div>` : ''}
             <div class="card-body">
               <h3>${escapeHtml(h.name)}</h3>
               <div class="city">${escapeHtml(h.city || '')}${h.country ? `, ${escapeHtml(h.country)}` : ''}</div>
@@ -208,31 +225,66 @@
             </div>
           </div>`;
       }).join('');
-      container.innerHTML = `<div class="cards">${cards}</div>${total ? `<p class="meta">Total available: ${total}</p>` : ''}`;
+      const diagBadge = `<p class="meta">${hotels.length} hotels · ${withImgs}/${hotels.length} have images · avg ${avg.toFixed(1)} per hotel${total ? ` · total available: ${total}` : ''}</p>`;
+      container.innerHTML = `<div class="cards">${cards}</div>${diagBadge}`;
       container.querySelectorAll('.card').forEach(c => c.addEventListener('click', () => loadDetails(c.dataset.id)));
     }
 
-    // --- Chat ---
+    // --- Chat (multi-turn) ---
+    let chatSession = null;  // session_id from VistaLink, set after first response
+
+    document.getElementById('reset-session').addEventListener('click', resetChat);
+
+    function resetChat() {
+      chatSession = null;
+      document.getElementById('chat-thread').innerHTML = '';
+      document.getElementById('session-bar').style.display = 'none';
+      document.querySelector('#chat-form textarea').value = '';
+    }
+
+    function appendTurn(role, contentHTML) {
+      const thread = document.getElementById('chat-thread');
+      const div = document.createElement('div');
+      div.className = `turn ${role}`;
+      div.innerHTML = `<span class="role-tag">${role}</span>${contentHTML}`;
+      thread.appendChild(div);
+      div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      return div;
+    }
+
     document.getElementById('chat-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const btn = e.target.querySelector('button');
+      const form = e.target;
+      const btn = form.querySelector('button');
+      const ta = form.querySelector('textarea');
+      const message = ta.value.trim();
+      if (!message) return;
       btn.disabled = true;
-      const out = document.getElementById('chat-results');
-      out.innerHTML = '<div class="loading">Asking VistaLink (this takes ~15-20s)…</div>';
-      const message = new FormData(e.target).get('message');
+
+      appendTurn('user', escapeHtml(message));
+      ta.value = '';
+      const pending = appendTurn('assistant', '<em style="opacity:0.6">Thinking… (~15-20s)</em>');
+
+      const payload = { message };
+      if (chatSession) payload.session_id = chatSession;
+
       try {
-        const body = await api('/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message }) });
-        const formatted = formatChatMessage(body.message || '');
-        out.innerHTML = `
-          <div class="chat-message">${formatted}</div>
-          ${body.session_id ? `<p class="meta">session_id: ${body.session_id}</p>` : ''}
-        `;
-        out.querySelectorAll('.hotel-ref').forEach(a => a.addEventListener('click', (ev) => {
+        const body = await api('/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        pending.innerHTML = `<span class="role-tag">assistant</span>${formatChatMessage(body.message || '')}`;
+        pending.querySelectorAll('.hotel-ref').forEach(a => a.addEventListener('click', (ev) => {
           ev.preventDefault();
           loadDetails(a.dataset.id);
         }));
-      } catch (err) { out.innerHTML = renderError(err); }
-      finally { btn.disabled = false; }
+        if (body.session_id) {
+          chatSession = body.session_id;
+          document.getElementById('session-id').textContent = chatSession;
+          document.getElementById('session-bar').style.display = 'flex';
+        }
+      } catch (err) {
+        pending.innerHTML = `<span class="role-tag">error</span>${renderError(err)}`;
+      } finally {
+        btn.disabled = false;
+      }
     });
 
     function formatChatMessage(msg) {

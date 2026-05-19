@@ -41,6 +41,16 @@ async def search(req: schemas.SearchRequest):
         row["status_code"] = int(headers.get("x-upstream-status", 200))
         _record_headers(row, headers)
         _record_validation(row, body, schemas.SearchResponse)
+        # #5 image diagnostic: how many hotels came back with images, and how many each?
+        hotels = body.get("hotels") or []
+        img_counts = [len(h.get("images") or []) for h in hotels]
+        row["image_stats"] = {
+            "hotels_returned": len(hotels),
+            "hotels_with_images": sum(1 for n in img_counts if n > 0),
+            "avg_images_per_hotel": round(sum(img_counts) / len(img_counts), 2) if img_counts else 0,
+            "max_images": max(img_counts) if img_counts else 0,
+        }
+        print(f"[images] {row['image_stats']}", flush=True)
         return body
 
 
