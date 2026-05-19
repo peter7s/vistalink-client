@@ -61,16 +61,34 @@
       cursor: pointer; transition: transform 0.1s, box-shadow 0.1s;
     }
     .card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-    .card img { width: 100%; height: 160px; object-fit: cover; background: #eee; }
     .card-body { padding: 0.75rem 1rem 1rem; }
+
+    /* Card image carousel */
+    .carousel { position: relative; overflow: hidden; }
+    .carousel-img { width: 100%; height: 200px; object-fit: cover; background: #eee; display: block; transition: opacity 0.15s; }
+    .carousel-btn {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: rgba(0,0,0,0.55); color: #fff; border: none;
+      width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+      font-size: 1.3rem; line-height: 1; padding: 0;
+      opacity: 0; transition: opacity 0.15s, background 0.1s;
+    }
+    .carousel:hover .carousel-btn { opacity: 1; }
+    .carousel-btn:hover { background: rgba(0,0,0,0.8); }
+    .carousel-btn.prev { left: 0.5rem; }
+    .carousel-btn.next { right: 0.5rem; }
+    .carousel-counter {
+      position: absolute; bottom: 0.5rem; right: 0.5rem;
+      background: rgba(0,0,0,0.65); color: #fff;
+      font-size: 0.7rem; padding: 0.15rem 0.45rem; border-radius: 4px;
+      pointer-events: none;
+    }
     .card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.25rem; }
     .card .city { font-size: 0.8rem; color: #666; margin-bottom: 0.5rem; }
     .card .ratings { display: flex; gap: 1rem; font-size: 0.8rem; margin-bottom: 0.5rem; }
     .card .ratings span { color: #555; }
     .card .desc { font-size: 0.8rem; color: #555; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .card .type { display: inline-block; margin-top: 0.5rem; font-size: 0.7rem; padding: 0.15rem 0.5rem; background: #f0f0f0; border-radius: 4px; color: #555; }
-    .card .img-wrap { position: relative; }
-    .card .img-count { position: absolute; bottom: 0.5rem; right: 0.5rem; background: rgba(0,0,0,0.65); color: #fff; font-size: 0.7rem; padding: 0.1rem 0.4rem; border-radius: 3px; }
 
     /* Chat */
     .chat-thread { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem; }
@@ -208,14 +226,24 @@
       const avg = imgCounts.reduce((a,b) => a+b, 0) / hotels.length;
       console.log(`[images] ${hotels.length} hotels, ${withImgs} with images, avg ${avg.toFixed(1)} images each`);
 
-      const cards = hotels.map(h => {
+      const cards = hotels.map((h, idx) => {
         const imgs = h.images || [];
-        const img = imgs[0] ? imgs[0].url : '';
+        const first = imgs[0] ? imgs[0].url : '';
         const star = h.star_rating ? `★ ${h.star_rating}` : '';
         const review = h.review_score ? `${h.review_score}/10 · ${h.review_count || '?'} reviews` : '';
+        const multi = imgs.length > 1;
         return `
-          <div class="card" data-id="${h.hotel_id}">
-            ${img ? `<div class="img-wrap"><img src="${img}" alt="" loading="lazy">${imgs.length > 1 ? `<span class="img-count">📷 ${imgs.length}</span>` : ''}</div>` : ''}
+          <div class="card" data-id="${h.hotel_id}" data-idx="${idx}">
+            ${first ? `
+              <div class="carousel" data-index="0">
+                <img class="carousel-img" src="${first}" alt="" loading="lazy">
+                ${multi ? `
+                  <button class="carousel-btn prev" type="button" aria-label="Previous image">‹</button>
+                  <button class="carousel-btn next" type="button" aria-label="Next image">›</button>
+                ` : ''}
+                ${imgs.length ? `<span class="carousel-counter">1 / ${imgs.length}</span>` : ''}
+              </div>
+            ` : ''}
             <div class="card-body">
               <h3>${escapeHtml(h.name)}</h3>
               <div class="city">${escapeHtml(h.city || '')}${h.country ? `, ${escapeHtml(h.country)}` : ''}</div>
@@ -227,7 +255,30 @@
       }).join('');
       const diagBadge = `<p class="meta">${hotels.length} hotels · ${withImgs}/${hotels.length} have images · avg ${avg.toFixed(1)} per hotel${total ? ` · total available: ${total}` : ''}</p>`;
       container.innerHTML = `<div class="cards">${cards}</div>${diagBadge}`;
-      container.querySelectorAll('.card').forEach(c => c.addEventListener('click', () => loadDetails(c.dataset.id)));
+
+      container.querySelectorAll('.card').forEach((card) => {
+        const idx = Number(card.dataset.idx);
+        const imgs = hotels[idx].images || [];
+        const carousel = card.querySelector('.carousel');
+        const imgEl = carousel?.querySelector('.carousel-img');
+        const counter = carousel?.querySelector('.carousel-counter');
+        const prev = carousel?.querySelector('.prev');
+        const next = carousel?.querySelector('.next');
+
+        if (carousel && imgs.length > 1) {
+          const go = (delta) => {
+            let i = Number(carousel.dataset.index);
+            i = (i + delta + imgs.length) % imgs.length;
+            carousel.dataset.index = i;
+            imgEl.src = imgs[i].url;
+            if (counter) counter.textContent = `${i + 1} / ${imgs.length}`;
+          };
+          prev.addEventListener('click', (e) => { e.stopPropagation(); go(-1); });
+          next.addEventListener('click', (e) => { e.stopPropagation(); go(1); });
+        }
+
+        card.addEventListener('click', () => loadDetails(card.dataset.id));
+      });
     }
 
     // --- Chat (multi-turn) ---
