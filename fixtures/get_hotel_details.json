@@ -1,0 +1,34 @@
+{
+  "hotel_id": "2e47f4d9-79a6-4a43-a2b6-0b6c803c416f",
+  "name": "Le Relais Montmartre",
+  "city": "Paris",
+  "country": "France",
+  "address": "6 Rue Constance, 75018 Paris",
+  "star_rating": 4.0,
+  "review_score": 8.9,
+  "review_count": 1842,
+  "latitude": 48.8854598,
+  "longitude": 2.3335965,
+  "website_url": "https://hotel-relais-montmartre.com",
+  "amenities": ["wifi", "breakfast", "bar", "concierge"],
+  "price": null,
+  "images": [
+    {"url": "https://hotel-images.vistalink.com/fr/hotelrelaismontmartre/amenity/general/1af29a24b798.jpg", "label": "lobby"},
+    {"url": "https://hotel-images.vistalink.com/fr/hotelrelaismontmartre/amenity/general/5a543bc38396.jpg", "label": "lobby"},
+    {"url": "https://hotel-images.vistalink.com/fr/hotelrelaismontmartre/amenity/general/6ecdf6fbb645.jpg", "label": "lobby"}
+  ],
+  "review_highlight": "Charming, boutique-style hotel that exceeded expectations in every way.",
+  "guest_insights": null,
+  "description": "Le Relais Montmartre, nestled in Paris' heart near Butte Montmartre, offers cozy rooms with floral fabrics, ensuite facilities, and flat-screen TVs. Guests enjoy free Wi-Fi, continental breakfast in their room or vaulted cellar, and proximity to Sacré-Cœur, Place du Tertre, and metro.",
+  "hotel_type": "Independent",
+  "rates": null,
+  "phone": "+33 1 70 64 25 25",
+  "rooms": [
+    {"name": "Classic Double", "description": "Cozy room with floral fabrics"},
+    {"name": "Deluxe", "description": "Larger room with rooftop view"}
+  ],
+  "reviews": [
+    {"author": "Élise M.", "rating": 5, "text": "Perfect location, beautiful design, lovely staff."},
+    {"author": "Tom R.", "rating": 4, "text": "Charming room, a touch noisy from the boulevard."}
+  ]
+}

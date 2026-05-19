@@ -1,0 +1,7 @@
+{
+  "call_id": "call_fixture_001",
+  "status": "completed",
+  "transcript_url": "https://api.vistalink.com/calls/call_fixture_001/transcript",
+  "summary": "Negotiated 12% off the Deluxe room rate for Fri–Sun stay; late checkout (2pm) confirmed; breakfast included at no charge.",
+  "duration_seconds": 142.3
+}

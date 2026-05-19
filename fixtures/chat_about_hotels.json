@@ -1,0 +1,11 @@
+{
+  "session_id": "69a962cf-2792-4c5b-90dd-96da042ba698",
+  "message": "Here are 3 cozy boutique hotels in Paris under €300/night:\n\n1. **Le Relais Montmartre** - Charming spot near Butte Montmartre with floral-fabric rooms and a vaulted cellar breakfast. <!--hotel:2e47f4d9-79a6-4a43-a2b6-0b6c803c416f-->\n\n2. **Hotel Abbatial Saint Germain** - Latin Quarter location 500m from Notre Dame, with air-conditioned rooms. <!--hotel:13912801-5416-4ec8-b2e6-fbc5c7c789e5-->\n\n3. **Hôtel Zélie Champs-Elysées** - Quiet street 350m from the Arc de Triomphe, mansard rooms with rooftop views. <!--hotel:1efb286c-ac40-4df5-869b-00408ae5c82a-->\n\nWant me to narrow by neighborhood or check availability for specific dates?",
+  "hotels": [],
+  "clarification_id": null,
+  "clarification_options": [],
+  "usage": {
+    "latency_ms": 19091,
+    "cost_usd": 0.03
+  }
+}

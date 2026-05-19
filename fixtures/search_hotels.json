@@ -1,0 +1,80 @@
+{
+  "hotels": [
+    {
+      "hotel_id": "2e47f4d9-79a6-4a43-a2b6-0b6c803c416f",
+      "name": "Le Relais Montmartre",
+      "city": "Paris",
+      "country": "France",
+      "address": null,
+      "star_rating": 4.0,
+      "review_score": 8.9,
+      "review_count": null,
+      "latitude": 48.8854598,
+      "longitude": 2.3335965,
+      "website_url": "https://hotel-relais-montmartre.com",
+      "amenities": [],
+      "price": null,
+      "images": [
+        {"url": "https://hotel-images.vistalink.com/fr/hotelrelaismontmartre/amenity/general/1af29a24b798.jpg", "label": "lobby"}
+      ],
+      "review_highlight": null,
+      "guest_insights": null,
+      "description": "Le Relais Montmartre, nestled in Paris' heart near Butte Montmartre, offers cozy rooms with floral fabrics.",
+      "hotel_type": "Independent",
+      "rates": null
+    },
+    {
+      "hotel_id": "13912801-5416-4ec8-b2e6-fbc5c7c789e5",
+      "name": "Hotel Abbatial Saint Germain",
+      "city": "Paris",
+      "country": "France",
+      "address": null,
+      "star_rating": 3.0,
+      "review_score": 8.7,
+      "review_count": null,
+      "latitude": 48.8498039,
+      "longitude": 2.3506608,
+      "website_url": "https://hotelabbatial.com",
+      "amenities": [],
+      "price": null,
+      "images": [
+        {"url": "https://hotel-images.vistalink.com/fr/abbatial-st-germain/amenity/general/4db00ea0bc7c.jpg", "label": "building"}
+      ],
+      "review_highlight": null,
+      "guest_insights": null,
+      "description": "Hotel Abbatial Saint Germain is located in Paris' Latin Quarter, 500 metres from Notre Dame Cathedral.",
+      "hotel_type": "Independent",
+      "rates": null
+    },
+    {
+      "hotel_id": "1efb286c-ac40-4df5-869b-00408ae5c82a",
+      "name": "Hôtel Zélie Champs-Elysées",
+      "city": "Paris",
+      "country": "France",
+      "address": null,
+      "star_rating": 3.0,
+      "review_score": 8.7,
+      "review_count": null,
+      "latitude": 48.8769738,
+      "longitude": 2.2950537,
+      "website_url": "https://www.hotelzelie.com/",
+      "amenities": [],
+      "price": null,
+      "images": [
+        {"url": "https://hotel-images.vistalink.com/fr/hotel-zelie/amenity/general/1e5595cfdffd.jpg", "label": "lobby"}
+      ],
+      "review_highlight": null,
+      "guest_insights": null,
+      "description": "Hôtel Zélie Champs-Elysées, Paris, is situated on a quiet, typically paved Parisian street, 350 meters from the Arc de Triomphe.",
+      "hotel_type": "Independent",
+      "rates": null
+    }
+  ],
+  "total": 50,
+  "fallback_used": false,
+  "fallback_message": null,
+  "usage": {
+    "latency_ms": 0,
+    "cost_usd": 0.01
+  }
+}

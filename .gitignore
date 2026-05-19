@@ -1,0 +1,29 @@
+# never commit
+.env
+.env.*
+!.env.example
+*.key
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+
+# Logs (per-machine; not useful to share)
+logs/*.jsonl
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+.env
+
+# Claude Code per-user settings
+.claude/settings.local.json
