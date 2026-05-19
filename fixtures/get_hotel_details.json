@@ -13,22 +13,38 @@
   "amenities": ["wifi", "breakfast", "bar", "concierge"],
   "price": null,
   "images": [
-    {"url": "https://hotel-images.vistalink.com/fr/hotelrelaismontmartre/amenity/general/1af29a24b798.jpg", "label": "lobby"},
-    {"url": "https://hotel-images.vistalink.com/fr/hotelrelaismontmartre/amenity/general/5a543bc38396.jpg", "label": "lobby"},
-    {"url": "https://hotel-images.vistalink.com/fr/hotelrelaismontmartre/amenity/general/6ecdf6fbb645.jpg", "label": "lobby"}
+    {"url": "https://hotel-images.vistalink.com/fr/hotelrelaismontmartre/amenity/general/1af29a24b798.jpg", "category": "exterior", "caption": "Hotel facade"},
+    {"url": "https://hotel-images.vistalink.com/fr/hotelrelaismontmartre/amenity/general/5a543bc38396.jpg", "category": "lobby", "caption": "Lobby with vaulted ceiling"},
+    {"url": "https://hotel-images.vistalink.com/fr/hotelrelaismontmartre/amenity/general/6ecdf6fbb645.jpg", "category": "room", "caption": "Classic double room"}
   ],
   "review_highlight": "Charming, boutique-style hotel that exceeded expectations in every way.",
-  "guest_insights": null,
+  "guest_insights": {
+    "highlights": ["location", "design", "staff warmth"],
+    "aspects": [
+      {"type": "service", "summary": "Staff consistently described as attentive and warm.", "sentiment": 0.92, "quote": "Lovely staff."},
+      {"type": "location", "summary": "Praised for proximity to Sacré-Cœur and metro.", "sentiment": 0.88, "quote": "Perfect location."}
+    ]
+  },
   "description": "Le Relais Montmartre, nestled in Paris' heart near Butte Montmartre, offers cozy rooms with floral fabrics, ensuite facilities, and flat-screen TVs. Guests enjoy free Wi-Fi, continental breakfast in their room or vaulted cellar, and proximity to Sacré-Cœur, Place du Tertre, and metro.",
-  "hotel_type": "Independent",
+  "hotel_type": "hotel",
   "rates": null,
   "phone_number": "+33 1 70 64 25 25",
   "rooms": [
-    {"name": "Classic Double", "description": "Cozy room with floral fabrics"},
-    {"name": "Deluxe", "description": "Larger room with rooftop view"}
+    {
+      "room_name": "Classic Double",
+      "room_size_sqm": 16,
+      "amenities": ["wifi", "minibar"],
+      "offers": [{"price": 245, "currency": "EUR", "has_breakfast": true, "has_free_cancellation": false}]
+    },
+    {
+      "room_name": "Deluxe",
+      "room_size_sqm": 22,
+      "amenities": ["wifi", "minibar", "rooftop_view"],
+      "offers": [{"price": 320, "currency": "EUR", "has_breakfast": true, "has_free_cancellation": true}]
+    }
   ],
   "reviews": [
-    {"author": "Élise M.", "rating": 5, "text": "Perfect location, beautiful design, lovely staff."},
-    {"author": "Tom R.", "rating": 4, "text": "Charming room, a touch noisy from the boulevard."}
+    {"body": "Perfect location, beautiful design, lovely staff.", "rating": 9.6},
+    {"body": "Charming room, a touch noisy from the boulevard.", "rating": 8.2}
   ]
 }

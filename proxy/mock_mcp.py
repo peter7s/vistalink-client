@@ -37,7 +37,7 @@ def _fake_card() -> dict:
         "review_highlight": fake.sentence(),
         "guest_insights": None,
         "description": fake.paragraph(nb_sentences=3),
-        "hotel_type": random.choice(["Independent", "Chain", "Boutique"]),
+        "hotel_type": random.choice(["hotel", "apartment", "boutique"]),
         "rates": None,
     }
 
@@ -87,8 +87,27 @@ async def get_hotel_details(hotel_id: str, payload: dict) -> tuple[dict, dict]:
         body = {
             **card,
             "phone_number": fake.phone_number(),
-            "rooms": [{"name": "Standard", "description": fake.sentence()}],
-            "reviews": [{"author": fake.name(), "rating": 5, "text": fake.sentence()}],
+            "rooms": [{
+                "room_name": "Standard",
+                "room_size_sqm": random.randint(14, 35),
+                "amenities": ["wifi", "minibar"],
+                "offers": [{
+                    "price": round(random.uniform(80, 400), 2),
+                    "currency": "EUR",
+                    "has_breakfast": random.choice([True, False]),
+                    "has_free_cancellation": random.choice([True, False]),
+                }],
+            }],
+            "reviews": [{"body": fake.sentence(), "rating": round(random.uniform(7.0, 10.0), 1)}],
+            "guest_insights": {
+                "highlights": random.sample(["location", "service", "design", "cleanliness", "breakfast"], k=3),
+                "aspects": [{
+                    "type": "service",
+                    "summary": fake.sentence(),
+                    "sentiment": round(random.uniform(0.6, 0.95), 2),
+                    "quote": fake.sentence(),
+                }],
+            },
         }
     else:
         body = _load("get_hotel_details.json")

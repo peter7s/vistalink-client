@@ -376,14 +376,24 @@
     }
 
     function renderDetails(container, h) {
-      const images = (h.images || []).slice(0, 12).map(i => `<img src="${i.url}" alt="${escapeHtml(i.label || '')}" loading="lazy">`).join('');
+      const altText = (i) => i.caption || i.label || i.category || '';
+      const images = (h.images || []).slice(0, 12).map(i => `<img src="${i.url}" alt="${escapeHtml(altText(i))}" loading="lazy">`).join('');
       const star = h.star_rating ? `<span>★ ${h.star_rating}</span>` : '';
-      const review = h.review_score ? `<span>${h.review_score}/10</span>` : '';
+      const review = h.review_score ? `<span>${h.review_score}/10${h.review_count ? ` · ${h.review_count} reviews` : ''}</span>` : '';
       const phone = h.phone_number ? `<span>📞 ${escapeHtml(h.phone_number)}</span>` : '';
       const website = h.website_url ? `<span><a href="${h.website_url}" target="_blank" rel="noopener">${escapeHtml(h.website_url)}</a></span>` : '';
       const amenities = (h.amenities || []).length ? `<div class="detail-section"><h3>Amenities</h3><ul>${h.amenities.map(a => `<li>${escapeHtml(a)}</li>`).join('')}</ul></div>` : '';
-      const rooms = (h.rooms || []).length ? `<div class="detail-section"><h3>Rooms</h3><ul>${h.rooms.map(r => `<li><strong>${escapeHtml(r.name || '')}</strong>${r.description ? ` — ${escapeHtml(r.description)}` : ''}</li>`).join('')}</ul></div>` : '';
-      const reviews = (h.reviews || []).length ? `<div class="detail-section"><h3>Reviews</h3><ul>${h.reviews.map(r => `<li><strong>${escapeHtml(r.author || '')}</strong> (${r.rating || '?'}/5): ${escapeHtml(r.text || '')}</li>`).join('')}</ul></div>` : '';
+      const rooms = (h.rooms || []).length ? `<div class="detail-section"><h3>Rooms</h3><ul>${h.rooms.map(r => {
+        const size = r.room_size_sqm ? ` · ${r.room_size_sqm}m²` : '';
+        const offer = (r.offers && r.offers[0]) ? ` · from ${r.offers[0].price} ${r.offers[0].currency || ''}${r.offers[0].has_breakfast ? ' (breakfast)' : ''}` : '';
+        return `<li><strong>${escapeHtml(r.room_name || '')}</strong>${size}${offer}</li>`;
+      }).join('')}</ul></div>` : '';
+      const reviews = (h.reviews || []).length ? `<div class="detail-section"><h3>Reviews</h3><ul>${h.reviews.map(r => `<li>${escapeHtml(r.body || '')}${r.rating ? ` <span style="color:#888">(${r.rating}/10)</span>` : ''}</li>`).join('')}</ul></div>` : '';
+      const gi = h.guest_insights;
+      const insights = (gi && (gi.highlights?.length || gi.aspects?.length)) ? `<div class="detail-section"><h3>Guest insights</h3>
+        ${gi.highlights?.length ? `<p style="margin-bottom:0.5rem;"><strong>Highlights:</strong> ${gi.highlights.map(escapeHtml).join(' · ')}</p>` : ''}
+        ${gi.aspects?.length ? `<ul>${gi.aspects.map(a => `<li><strong>${escapeHtml(a.type || '')}</strong>: ${escapeHtml(a.summary || '')}${a.quote ? ` <em style="color:#555">"${escapeHtml(a.quote)}"</em>` : ''}</li>`).join('')}</ul>` : ''}
+      </div>` : '';
       container.innerHTML = `
         <div class="detail-header">
           <h2>${escapeHtml(h.name)}</h2>
@@ -395,7 +405,7 @@
           <p>${escapeHtml(h.description || '')}</p>
         </div>
         ${images ? `<div class="gallery">${images}</div>` : ''}
-        ${amenities}${rooms}${reviews}
+        ${amenities}${rooms}${reviews}${insights}
       `;
     }
 
