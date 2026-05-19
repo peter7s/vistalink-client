@@ -22,7 +22,7 @@
   "description": "Le Relais Montmartre, nestled in Paris' heart near Butte Montmartre, offers cozy rooms with floral fabrics, ensuite facilities, and flat-screen TVs. Guests enjoy free Wi-Fi, continental breakfast in their room or vaulted cellar, and proximity to Sacré-Cœur, Place du Tertre, and metro.",
   "hotel_type": "Independent",
   "rates": null,
-  "phone": "+33 1 70 64 25 25",
+  "phone_number": "+33 1 70 64 25 25",
   "rooms": [
     {"name": "Classic Double", "description": "Cozy room with floral fabrics"},
     {"name": "Deluxe", "description": "Larger room with rooftop view"}

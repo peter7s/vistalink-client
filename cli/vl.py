@@ -75,10 +75,14 @@ def chat(
     _render_results(body)
     if body.get("session_id"):
         print(f"\n[dim]session_id: {body['session_id']}[/dim]")
-    if body.get("clarification_options"):
-        print("\n[yellow]Clarification options:[/yellow]")
-        for opt in body["clarification_options"]:
-            print(f"  [{opt.get('id')}] {opt.get('label')}")
+    clar = body.get("clarification_pending")
+    if clar:
+        print(f"\n[yellow]{clar.get('question', 'Clarification needed:')}[/yellow]")
+        for opt in clar.get("options", []):
+            desc = f" — {opt['description']}" if opt.get("description") else ""
+            print(f"  [{opt.get('id')}] {opt.get('label')}{desc}")
+        if clar.get("allow_free_text"):
+            print("[dim](free-text reply allowed)[/dim]")
 
 
 @app.command()

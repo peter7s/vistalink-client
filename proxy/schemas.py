@@ -79,7 +79,7 @@ class Hotel(BaseModel):
     description: Optional[str] = None
     hotel_type: Optional[str] = None  # e.g. "Independent"
     rates: Optional[Any] = None       # Shape unconfirmed (returned when include_rates=true)
-    phone: Optional[str] = None
+    phone_number: Optional[str] = None  # Per docs — mandatory before any call_hotel request
     rooms: list[dict] = []
     reviews: list[dict] = []
     model_config = ConfigDict(extra="allow")
@@ -107,18 +107,31 @@ class SearchResponse(BaseModel):
 class ClarificationOption(BaseModel):
     id: str
     label: str
+    description: Optional[str] = None
+    model_config = ConfigDict(extra="allow")
+
+
+class Clarification(BaseModel):
+    """Nested clarification object as documented: ChatResponse.clarification_pending."""
+    clarification_id: str
+    question: str
+    options: list[ClarificationOption] = []
+    allow_free_text: bool = False
+    display_mode: Optional[str] = None  # e.g. "inline"
     model_config = ConfigDict(extra="allow")
 
 
 class ChatResponse(BaseModel):
-    """VistaLink /v1/chat returns prose in `message` with inline `<!--hotel:UUID-->`
-    HTML comments marking each hotel. Structured `hotels` may be absent or empty.
-    Frontends should parse the inline markers (or call get_hotel_details per UUID)."""
+    """VistaLink /v1/chat. Per docs, `hotels` should contain candidates with basic info;
+    in practice (observed 2026-05-19) it returns as []. Prose in `message` contains
+    inline `<!--hotel:UUID-->` markers as a fallback signal. See docs/vistalink-chat-image-gap.md."""
     session_id: Optional[str] = None
     message: Optional[str] = None
     hotels: list[Hotel] = []
-    clarification_id: Optional[str] = None
-    clarification_options: list[ClarificationOption] = []
+    clarification_pending: Optional[Clarification] = None
+    references: list[dict] = []   # Web sources when the engine used live search
+    pois: list[dict] = []         # Points of interest when proximity relevant
+    routes: list[dict] = []       # Route data for location matching
     usage: Optional[Usage] = None
     model_config = ConfigDict(extra="allow")
 

@@ -379,7 +379,7 @@
       const images = (h.images || []).slice(0, 12).map(i => `<img src="${i.url}" alt="${escapeHtml(i.label || '')}" loading="lazy">`).join('');
       const star = h.star_rating ? `<span>★ ${h.star_rating}</span>` : '';
       const review = h.review_score ? `<span>${h.review_score}/10</span>` : '';
-      const phone = h.phone ? `<span>📞 ${escapeHtml(h.phone)}</span>` : '';
+      const phone = h.phone_number ? `<span>📞 ${escapeHtml(h.phone_number)}</span>` : '';
       const website = h.website_url ? `<span><a href="${h.website_url}" target="_blank" rel="noopener">${escapeHtml(h.website_url)}</a></span>` : '';
       const amenities = (h.amenities || []).length ? `<div class="detail-section"><h3>Amenities</h3><ul>${h.amenities.map(a => `<li>${escapeHtml(a)}</li>`).join('')}</ul></div>` : '';
       const rooms = (h.rooms || []).length ? `<div class="detail-section"><h3>Rooms</h3><ul>${h.rooms.map(r => `<li><strong>${escapeHtml(r.name || '')}</strong>${r.description ? ` — ${escapeHtml(r.description)}` : ''}</li>`).join('')}</ul></div>` : '';

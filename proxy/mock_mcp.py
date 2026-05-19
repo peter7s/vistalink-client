@@ -68,8 +68,10 @@ async def chat_about_hotels(payload: dict) -> tuple[dict, dict]:
             "session_id": payload.get("session_id") or str(uuid.uuid4()),
             "message": f"Here are a few options matching your vibe. {markers}",
             "hotels": [],
-            "clarification_id": None,
-            "clarification_options": [],
+            "clarification_pending": None,
+            "references": [],
+            "pois": [],
+            "routes": [],
             "usage": {"latency_ms": random.randint(2000, 20000), "cost_usd": 0.03},
         }
     else:
@@ -84,7 +86,7 @@ async def get_hotel_details(hotel_id: str, payload: dict) -> tuple[dict, dict]:
         card["hotel_id"] = hotel_id
         body = {
             **card,
-            "phone": fake.phone_number(),
+            "phone_number": fake.phone_number(),
             "rooms": [{"name": "Standard", "description": fake.sentence()}],
             "reviews": [{"author": fake.name(), "rating": 5, "text": fake.sentence()}],
         }
