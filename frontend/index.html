@@ -122,6 +122,27 @@
     .room-images { display: flex; gap: 0.4rem; margin-top: 0.5rem; overflow-x: auto; padding-bottom: 0.25rem; }
     .room-images img { width: 110px; height: 80px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
 
+    /* Call view */
+    .call-warning { background: #fffbeb; border: 1px solid #fde68a; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.85rem; color: #78350f; margin-bottom: 1rem; }
+    .call-card { background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; }
+    .call-status-row { display: flex; gap: 1rem; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; font-size: 0.85rem; }
+    .call-phase { padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+    .phase-dispatching { background: #fef3c7; color: #92400e; }
+    .phase-in_progress { background: #dbeafe; color: #1e40af; }
+    .phase-completed { background: #d1fae5; color: #065f46; }
+    .phase-failed { background: #fee2e2; color: #991b1b; }
+    .call-id { color: #888; font-family: ui-monospace, monospace; font-size: 0.75rem; }
+    .call-duration { margin-left: auto; color: #666; }
+    .call-transcript { background: #f5f5f5; border-radius: 6px; padding: 0.75rem 1rem; font-family: ui-monospace, monospace; font-size: 0.8rem; line-height: 1.5; white-space: pre-wrap; max-height: 400px; overflow-y: auto; }
+    .call-summary { padding: 0.75rem 1rem; background: #f0f9ff; border-left: 3px solid #0ea5e9; border-radius: 4px; font-size: 0.9rem; margin-bottom: 0.75rem; }
+    .call-outputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.5rem; margin-bottom: 0.75rem; }
+    .call-output { background: #f5f5f5; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.8rem; }
+    .call-output .key { color: #666; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .call-output .val { font-weight: 600; margin-top: 0.15rem; }
+    .call-recording { display: block; width: 100%; margin: 0.75rem 0; }
+    .call-pulse { display: inline-block; width: 8px; height: 8px; background: #3b82f6; border-radius: 50%; margin-right: 0.4rem; animation: pulse 1.2s ease-in-out infinite; vertical-align: middle; }
+    @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
     /* States */
     .empty { padding: 3rem; text-align: center; color: #888; font-size: 0.9rem; }
     .error { background: #fef2f2; border: 1px solid #fecaca; padding: 1rem; border-radius: 8px; color: #991b1b; font-size: 0.9rem; }
@@ -136,6 +157,7 @@
       <button data-tab="search" class="active">Search</button>
       <button data-tab="chat">Chat</button>
       <button data-tab="details">Details</button>
+      <button data-tab="call">Call</button>
     </nav>
   </header>
 
@@ -180,6 +202,67 @@
         <button type="submit" class="submit" style="margin-top:0.75rem;">Load</button>
       </form>
       <div id="details-results"></div>
+    </section>
+
+    <!-- CALL VIEW -->
+    <section id="call-view" class="view">
+      <div class="call-warning">
+        ⚠️ This places a real AI-agent phone call to the hotel. Cost: $0.50 base + $0.05/min over 10min.
+        Pro/Enterprise tier only — free-tier API keys return 403.
+      </div>
+      <form id="call-form">
+        <div class="form-row">
+          <div><label>Hotel ID *</label><input name="hotel_id" required></div>
+          <div><label>Phone (E.164) *</label><input name="phone_number" placeholder="+33146340212" required></div>
+          <div><label>Hotel name *</label><input name="hotel_name" placeholder="Hotel Abbatial Saint Germain" required></div>
+        </div>
+        <div class="form-row">
+          <div><label>Scenario</label>
+            <select name="scenario">
+              <option value="hotel_negotiation">Negotiate rate</option>
+              <option value="hotel_confirm_booking">Confirm booking</option>
+              <option value="hotel_cancel_booking">Cancel booking</option>
+            </select>
+          </div>
+          <div><label>Language</label>
+            <select name="language">
+              <option value="">(default)</option>
+              <option value="en">English</option>
+              <option value="fr">French</option>
+              <option value="it">Italian</option>
+              <option value="es">Spanish</option>
+              <option value="de">German</option>
+            </select>
+          </div>
+          <div><label>Currency</label><input name="currency" placeholder="EUR" maxlength="3"></div>
+        </div>
+        <div class="form-row">
+          <div><label>Booking price</label><input name="booking_price" type="number" step="0.01"></div>
+          <div><label>Check-in</label><input name="check_in_date" placeholder="2026-07-01"></div>
+          <div><label>Check-out</label><input name="check_out_date" placeholder="2026-07-03"></div>
+          <div><label>Rooms</label><input name="number_of_rooms" type="number" min="1"></div>
+          <div><label>Guests</label><input name="number_of_people" type="number" min="1"></div>
+        </div>
+        <div class="form-row">
+          <div><label>Guest first name</label><input name="guest_first_name"></div>
+          <div><label>Guest last name</label><input name="guest_last_name"></div>
+          <div><label>Guest email</label><input name="guest_email" type="email"></div>
+        </div>
+        <div class="form-row">
+          <div><label>Room type</label><input name="room_type" placeholder="deluxe double"></div>
+          <div><label>Confirmation number</label><input name="confirmation_number" placeholder="for confirm/cancel scenarios"></div>
+        </div>
+        <div style="margin-bottom: 0.75rem;">
+          <label>Special requests</label>
+          <input name="special_requests" placeholder="late check-in, high floor">
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label>Caller instructions (coaching for the AI agent)</label>
+          <textarea name="caller_instructions" rows="2" placeholder="Aim for 240 EUR/night. Emphasize direct booking."></textarea>
+        </div>
+        <button type="submit" class="submit">Dispatch call</button>
+      </form>
+      <div id="call-results"></div>
     </section>
   </main>
 
@@ -374,6 +457,9 @@
           return;
         }
         renderDetails(out, body);
+        prefillCallForm(body);
+        const callBtn = document.getElementById('call-this-hotel');
+        if (callBtn) callBtn.addEventListener('click', () => switchTab('call'));
       } catch (err) { out.innerHTML = renderError(err); }
     }
 
@@ -400,6 +486,8 @@
         ${gi.highlights?.length ? `<p style="margin-bottom:0.5rem;"><strong>Highlights:</strong> ${gi.highlights.map(escapeHtml).join(' · ')}</p>` : ''}
         ${gi.aspects?.length ? `<ul>${gi.aspects.map(a => `<li><strong>${escapeHtml(a.type || '')}</strong>: ${escapeHtml(a.summary || '')}${a.quote ? ` <em style="color:#555">"${escapeHtml(a.quote)}"</em>` : ''}</li>`).join('')}</ul>` : ''}
       </div>` : '';
+      const canCall = !!(h.hotel_id && h.phone_number && h.name);
+      const callButton = canCall ? `<button class="submit" id="call-this-hotel" style="margin-top:0.75rem;">📞 Call this hotel</button>` : '';
       container.innerHTML = `
         <div class="detail-header">
           <h2>${escapeHtml(h.name)}</h2>
@@ -409,10 +497,139 @@
             ${phone}${website}
           </div>
           <p>${escapeHtml(h.description || '')}</p>
+          ${callButton}
         </div>
         ${images ? `<div class="gallery">${images}</div>` : ''}
         ${amenities}${rooms}${reviews}${insights}
       `;
+    }
+
+    // --- Call (voice agent) ---
+    let activeCallId = null;   // tracks the current in-flight call so a new dispatch abandons stale polling
+
+    document.getElementById('call-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const btn = form.querySelector('button');
+      const out = document.getElementById('call-results');
+
+      const data = Object.fromEntries(new FormData(form));
+      const payload = {};
+      for (const [k, v] of Object.entries(data)) {
+        if (v === '') continue;
+        if (['number_of_rooms', 'number_of_people'].includes(k)) payload[k] = parseInt(v, 10);
+        else if (k === 'booking_price') payload[k] = parseFloat(v);
+        else payload[k] = v;
+      }
+
+      btn.disabled = true;
+      out.innerHTML = '<div class="loading"><span class="call-pulse"></span>Dispatching…</div>';
+
+      try {
+        const dispatch = await api('/call', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        if (!dispatch.call_id) {
+          out.innerHTML = renderError({ status: 200, body: JSON.stringify(dispatch) }, 'Dispatch failed (no call_id).');
+          return;
+        }
+        activeCallId = dispatch.call_id;
+        renderCallProgress(out, dispatch, null);
+        pollCallStatus(dispatch.call_id, out);
+      } catch (err) {
+        out.innerHTML = renderError(err, 'Dispatch failed.');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    async function pollCallStatus(callId, out) {
+      const start = Date.now();
+      while (true) {
+        if (callId !== activeCallId) return;
+        await new Promise(r => setTimeout(r, 5000));
+        let status;
+        try {
+          status = await api(`/call/${encodeURIComponent(callId)}/status`);
+        } catch (err) {
+          // voice can be flaky — log and keep polling unless timeout
+          console.error('status poll error', err);
+          if (Date.now() - start > 15 * 60 * 1000) {
+            out.insertAdjacentHTML('beforeend', `<div class="error">Polling timed out (15 min). Status fetcher returned errors; check Network tab.</div>`);
+            return;
+          }
+          continue;
+        }
+        renderCallProgress(out, { call_id: callId }, status);
+        if (status.status === 'completed' || status.status === 'failed') {
+          try {
+            const results = await api(`/call/${encodeURIComponent(callId)}/results`);
+            renderCallResults(out, results);
+          } catch (err) {
+            out.insertAdjacentHTML('beforeend', renderError(err, 'Couldn\'t fetch results.'));
+          }
+          return;
+        }
+        if (Date.now() - start > 15 * 60 * 1000) {
+          out.insertAdjacentHTML('beforeend', `<div class="error">Polling timed out after 15 min. Call may still be running; check call_id <code>${callId}</code> manually.</div>`);
+          return;
+        }
+      }
+    }
+
+    function renderCallProgress(container, dispatch, status) {
+      const callId = (status && status.call_id) || dispatch.call_id;
+      const phase = (status && status.status) || dispatch.status || 'dispatching';
+      const dur = status && status.duration_seconds ? `${status.duration_seconds}s` : '';
+      const transcript = status && status.transcript ? `<div class="call-transcript">${escapeHtml(status.transcript)}</div>` : '';
+      const dispatchMsg = dispatch.message ? `<p style="font-size:0.85rem;color:#555;margin-bottom:0.75rem;">${escapeHtml(dispatch.message)}</p>` : '';
+      const queuedNote = dispatch.queue_position ? `<span style="color:#666;font-size:0.8rem;">queue: #${dispatch.queue_position}</span>` : '';
+      container.innerHTML = `
+        <div class="call-card">
+          <div class="call-status-row">
+            <span class="call-phase phase-${phase}">${(phase === 'in_progress' || phase === 'dispatching') ? '<span class="call-pulse"></span>' : ''}${phase}</span>
+            <span class="call-id">${callId}</span>
+            ${queuedNote}
+            ${dur ? `<span class="call-duration">${dur}</span>` : ''}
+          </div>
+          ${dispatchMsg}
+          ${transcript}
+        </div>`;
+    }
+
+    function renderCallResults(container, results) {
+      const outputs = results.structured_outputs || {};
+      const outBlocks = Object.entries(outputs).map(([k, v]) => `
+        <div class="call-output">
+          <div class="key">${escapeHtml(k)}</div>
+          <div class="val">${escapeHtml(String(v))}</div>
+        </div>`).join('');
+      const recording = results.recording_url ? `
+        <p style="font-size:0.8rem;color:#666;margin-top:0.5rem;">Recording:</p>
+        <audio class="call-recording" controls src="${results.recording_url}"></audio>
+        <p style="font-size:0.75rem;color:#888;"><a href="${results.recording_url}" target="_blank" rel="noopener">Open in new tab</a> (if the inline player can't load it)</p>
+      ` : '';
+      const meta = [
+        results.duration_seconds != null ? `${results.duration_seconds}s` : null,
+        results.exchange_count != null ? `${results.exchange_count} exchanges` : null,
+        results.cost_usd != null ? `$${results.cost_usd}` : null,
+      ].filter(Boolean).join(' · ');
+
+      container.insertAdjacentHTML('beforeend', `
+        <div class="call-card">
+          ${results.summary ? `<div class="call-summary">${escapeHtml(results.summary)}</div>` : ''}
+          ${outBlocks ? `<div class="call-outputs">${outBlocks}</div>` : ''}
+          ${meta ? `<p style="font-size:0.8rem;color:#666;">${meta}</p>` : ''}
+          ${recording}
+          ${results.transcript ? `<details style="margin-top:0.75rem;"><summary style="cursor:pointer;font-size:0.85rem;color:#555;">Full transcript</summary><div class="call-transcript" style="margin-top:0.5rem;">${escapeHtml(results.transcript)}</div></details>` : ''}
+        </div>`);
+    }
+
+    // Hook: when details view loads a hotel, pre-fill the call form so users can
+    // jump from "look at this hotel" to "call this hotel" in one click.
+    function prefillCallForm(hotel) {
+      const form = document.getElementById('call-form');
+      if (hotel.hotel_id) form.hotel_id.value = hotel.hotel_id;
+      if (hotel.phone_number) form.phone_number.value = hotel.phone_number;
+      if (hotel.name) form.hotel_name.value = hotel.name;
     }
 
     function renderError(err, prefix = '') {
