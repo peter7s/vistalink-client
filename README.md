@@ -41,10 +41,10 @@ Switch to the real API anywhere: `VL_MODE=live VL_API_KEY=vl_test_...`. Default 
 ## VistaLink endpoint coverage (current state)
 | Tool | Real endpoint | Live mode | Mock mode |
 |---|---|---|---|
-| Search | `POST /v1/search` | ✅ verified 2026-05-18 | ✅ |
-| Chat | `POST /v1/chat` | ✅ verified 2026-05-18 | ✅ |
-| Hotel details | `GET /v1/hotels/{id}` | ⚠️ upstream returns HTTP 500 (see below) | ✅ |
-| Voice / call | `POST /v1/hotel/{negotiate,confirm-booking,cancel-booking,callback}` + async polling | ⛔ pending refactor | ✅ (legacy single-call mock) |
+| Search | `POST /v1/search` | ✅ | ✅ |
+| Chat | `POST /v1/chat` | ✅ | ✅ |
+| Hotel details | `GET /v1/hotels/{id}` | ✅ | ✅ |
+| Voice / call | `POST /v1/hotel/{negotiate,confirm-booking,cancel-booking,callback}` + async polling | ✅ | ✅ |
 
 **Known upstream issue (2026-05-18):** `GET /v1/hotels/{id}` returns `HTTP 500 Internal Server Error` from VistaLink's server (`server: cloudflare → railway/europe-west4`) for hotel IDs returned by `/v1/search`. The harness's defensive error handling captures the upstream status in [proxy/mcp_client.py](proxy/mcp_client.py) and surfaces it as a structured error response. To be reported to VistaLink.
 
