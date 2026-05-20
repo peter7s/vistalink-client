@@ -44,11 +44,9 @@ Switch to the real API anywhere: `VL_MODE=live VL_API_KEY=vl_test_...`. Default 
 | Search | `POST /v1/search` | ✅ | ✅ |
 | Chat | `POST /v1/chat` | ✅ | ✅ |
 | Hotel details | `GET /v1/hotels/{id}` | ✅ | ✅ |
-| Voice / call | `POST /v1/hotel/{negotiate,confirm-booking,cancel-booking,callback}` + async polling | ✅ | ✅ |
+| Voice / call | `POST /v1/call` (single dispatcher, scenario field) + async polling on `/v1/call/{id}/status` and `/v1/call/{id}/results` | ✅ verified end-to-end 2026-05-20 | ✅ |
 
-**Known upstream issue (2026-05-18):** `GET /v1/hotels/{id}` returns `HTTP 500 Internal Server Error` from VistaLink's server (`server: cloudflare → railway/europe-west4`) for hotel IDs returned by `/v1/search`. The harness's defensive error handling captures the upstream status in [proxy/mcp_client.py](proxy/mcp_client.py) and surfaces it as a structured error response. To be reported to VistaLink.
-
-Voice/call works against the mock for demos, but live voice testing is deferred — the harness still targets the deprecated `POST /v1/call`. To be addressed in a follow-up.
+All four tools have been live-tested against the real API. The proxy uses defensive error handling — if VistaLink returns a non-JSON response (e.g., the intermittent HTTP 500 we saw on `/v1/hotels/{id}` 2026-05-18, since resolved), [proxy/mcp_client.py](proxy/mcp_client.py) captures the upstream status and surfaces it as a structured error rather than crashing.
 
 ## Live-mode smoke test (do this first with your real key)
 ```bash
@@ -81,11 +79,14 @@ VL_MODE=mock uvicorn proxy.main:app --reload --port 8787
 
 Drive it from the CLI in another terminal:
 ```bash
-python -m cli.vl search "boutique hotel paris under 300"
-python -m cli.vl details hotel_abc123
+python -m cli.vl search --city Paris --limit 5
 python -m cli.vl chat "find me something walkable near the Louvre"
-python -m cli.vl call hotel_abc123 --message "ask about late checkout"
+python -m cli.vl details <hotel_id_from_search>
+python -m cli.vl call <hotel_id> --phone "+33..." --name "Hotel X" \
+  --scenario hotel_negotiation --wait
 ```
+
+See [TOOL_SETUP.md](TOOL_SETUP.md) for the full per-tool parameter reference.
 
 Inspect the auto-generated OpenAPI spec at http://localhost:8787/docs — this is what a frontend or LLM toolchain consumes.
 
