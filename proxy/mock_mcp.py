@@ -88,15 +88,12 @@ async def get_hotel_details(hotel_id: str, payload: dict) -> tuple[dict, dict]:
             **card,
             "phone_number": fake.phone_number(),
             "rooms": [{
-                "room_name": "Standard",
-                "room_size_sqm": random.randint(14, 35),
-                "amenities": ["wifi", "minibar"],
-                "offers": [{
-                    "price": round(random.uniform(80, 400), 2),
-                    "currency": "EUR",
-                    "has_breakfast": random.choice([True, False]),
-                    "has_free_cancellation": random.choice([True, False]),
-                }],
+                "room_id": str(uuid.uuid4()),
+                "name": random.choice(["Standard", "Single Room", "Double Room", "Suite"]),
+                "size_sqm": float(random.randint(10, 50)),
+                "is_suite": random.choice([True, False]),
+                "bed_summary": random.choice(["1 single bed", "1 queen bed", "1 king bed", "2 single beds"]),
+                "amenities": random.sample(["wifi", "minibar", "tv", "balcony"], k=2),
             }],
             "reviews": [{"body": fake.sentence(), "rating": round(random.uniform(7.0, 10.0), 1)}],
             "guest_insights": {
