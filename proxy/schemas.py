@@ -283,16 +283,23 @@ class CallStatus(BaseModel):
 
 class CallResults(BaseModel):
     """Response from GET /v1/call/{call_id}/results.
-    Returns 409 if call hasn't completed yet — poll /status first."""
+    Returns 409 if call hasn't completed yet — poll /status first.
+
+    Note from live testing 2026-05-20: top-level `summary` came back null and
+    the real call summary lives inside structured_outputs.call_summary.
+    Frontend should fall back to structured_outputs.call_summary when summary
+    is null. See docs/vistalink-call-hotel-feedback.md."""
     call_id: str
     status: CallStatusValue
-    structured_outputs: Optional[dict] = None  # Scenario-specific (e.g. {negotiated_price, currency, outcome})
+    structured_outputs: Optional[dict] = None  # Rich scenario-specific dict (much wider than the docs example)
     transcript: Optional[str] = None
-    recording_url: Optional[str] = None
-    summary: Optional[str] = None
+    recording_url: Optional[str] = None        # Lives on recordings.vistalink.com, not api.vistalink.com
+    summary: Optional[str] = None              # Often null; prefer structured_outputs.call_summary
     duration_seconds: Optional[float] = None
     exchange_count: Optional[int] = None
     cost_usd: Optional[float] = None
+    created_at: Optional[str] = None           # ISO timestamp; not in docs but consistently returned
+    completed_at: Optional[str] = None         # ISO timestamp; not in docs but consistently returned
     model_config = ConfigDict(extra="allow")
 
 

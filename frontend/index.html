@@ -597,11 +597,16 @@
 
     function renderCallResults(container, results) {
       const outputs = results.structured_outputs || {};
-      const outBlocks = Object.entries(outputs).map(([k, v]) => `
-        <div class="call-output">
-          <div class="key">${escapeHtml(k)}</div>
-          <div class="val">${escapeHtml(String(v))}</div>
-        </div>`).join('');
+      // Top-level summary is often null in practice; fall back to structured_outputs.call_summary.
+      const summary = results.summary || outputs.call_summary || '';
+      // Hide call_summary from the structured-outputs grid since we render it in the banner above.
+      const outBlocks = Object.entries(outputs)
+        .filter(([k, v]) => k !== 'call_summary' && v !== null && v !== undefined && v !== '')
+        .map(([k, v]) => `
+          <div class="call-output">
+            <div class="key">${escapeHtml(k)}</div>
+            <div class="val">${escapeHtml(String(v))}</div>
+          </div>`).join('');
       const recording = results.recording_url ? `
         <p style="font-size:0.8rem;color:#666;margin-top:0.5rem;">Recording:</p>
         <audio class="call-recording" controls src="${results.recording_url}"></audio>
@@ -615,7 +620,7 @@
 
       container.insertAdjacentHTML('beforeend', `
         <div class="call-card">
-          ${results.summary ? `<div class="call-summary">${escapeHtml(results.summary)}</div>` : ''}
+          ${summary ? `<div class="call-summary">${escapeHtml(summary)}</div>` : ''}
           ${outBlocks ? `<div class="call-outputs">${outBlocks}</div>` : ''}
           ${meta ? `<p style="font-size:0.8rem;color:#666;">${meta}</p>` : ''}
           ${recording}
