@@ -1,0 +1,15 @@
+{
+  "call_id": "call_7f3kR9mW",
+  "status": "completed",
+  "structured_outputs": {
+    "negotiated_price": 240,
+    "currency": "EUR",
+    "outcome": "success"
+  },
+  "transcript": "Agent: Hello, Hotel & Palazzo speaking...\nAI: Hello, I'm calling on behalf of Marco Rossi about a 3-night stay from June 15. The current rate is 280 EUR — could we go to 240 EUR for a direct booking?\nAgent: Let me check... yes, we can do 240 EUR per night for that stay.\nAI: Wonderful, thank you.",
+  "recording_url": "https://api.vistalink.com/calls/call_7f3kR9mW/recording.mp3",
+  "summary": "Negotiated rate from 280 to 240 EUR/night for 3 nights.",
+  "duration_seconds": 180,
+  "exchange_count": 14,
+  "cost_usd": 0.50
+}

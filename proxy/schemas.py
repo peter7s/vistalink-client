@@ -223,11 +223,67 @@ class ChatResponse(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
-class CallResponse(BaseModel):
-    """Legacy single-call shape. Voice flow refactor pending — see proxy/mcp_client.py."""
+CallScenario = Literal["hotel_negotiation", "hotel_confirm_booking", "hotel_cancel_booking"]
+CallStatusValue = Literal["dispatching", "in_progress", "completed", "failed"]
+
+
+class CallRequest(BaseModel):
+    """POST /v1/call body. Single endpoint dispatches to a scenario playbook.
+    Pro/Enterprise tier only — free tier returns 403."""
+    hotel_id: str
+    phone_number: str = Field(description="E.164 format, e.g. +390551234567. Fetch from get_hotel_details.")
+    hotel_name: str = Field(description="Used by the voice agent to introduce itself")
+    scenario: CallScenario = "hotel_negotiation"
+    guest_first_name: Optional[str] = None
+    guest_last_name: Optional[str] = None
+    guest_email: Optional[str] = None
+    check_in_date: Optional[str] = Field(default=None, description="YYYY-MM-DD")
+    check_out_date: Optional[str] = Field(default=None, description="YYYY-MM-DD")
+    number_of_rooms: Optional[int] = Field(default=None, ge=1)
+    number_of_people: Optional[int] = Field(default=None, ge=1)
+    booking_price: Optional[float] = Field(default=None, ge=0)
+    room_type: Optional[str] = None
+    currency: Optional[str] = Field(default=None, min_length=3, max_length=3)
+    language: Optional[str] = Field(default=None, description="e.g. 'en', 'it', 'fr' — TTS/STT switches accordingly")
+    confirmation_number: Optional[str] = None
+    special_requests: Optional[str] = None
+    caller_instructions: Optional[str] = Field(default=None, description="Free-form coaching for the voice agent")
+
+
+class CallDispatched(BaseModel):
+    """Immediate response from POST /v1/call. Returns before the call places."""
     call_id: str
-    status: Literal["queued", "in_progress", "completed", "failed"]
-    transcript_url: Optional[str] = None
+    ui_call_id: Optional[str] = None
+    status: CallStatusValue = "dispatching"
+    queue_position: Optional[int] = None
+    message: Optional[str] = None
+    model_config = ConfigDict(extra="allow")
+
+
+class CallStatus(BaseModel):
+    """Response from GET /v1/call/{call_id}/status. Poll every 10-30s."""
+    call_id: str
+    status: CallStatusValue
+    duration_seconds: Optional[float] = None
+    updated_at: Optional[str] = None
+    transcript: Optional[str] = None  # may be partial while in_progress
+    model_config = ConfigDict(extra="allow")
+
+
+class CallResults(BaseModel):
+    """Response from GET /v1/call/{call_id}/results.
+    Returns 409 if call hasn't completed yet — poll /status first."""
+    call_id: str
+    status: CallStatusValue
+    structured_outputs: Optional[dict] = None  # Scenario-specific (e.g. {negotiated_price, currency, outcome})
+    transcript: Optional[str] = None
+    recording_url: Optional[str] = None
     summary: Optional[str] = None
     duration_seconds: Optional[float] = None
+    exchange_count: Optional[int] = None
+    cost_usd: Optional[float] = None
     model_config = ConfigDict(extra="allow")
+
+
+# Backwards-compat alias so existing fixture/tests still validate during migration.
+CallResponse = CallDispatched

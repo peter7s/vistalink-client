@@ -1,7 +1,7 @@
 {
-  "call_id": "call_fixture_001",
-  "status": "completed",
-  "transcript_url": "https://api.vistalink.com/calls/call_fixture_001/transcript",
-  "summary": "Negotiated 12% off the Deluxe room rate for Fri–Sun stay; late checkout (2pm) confirmed; breakfast included at no charge.",
-  "duration_seconds": 142.3
+  "call_id": "call_7f3kR9mW",
+  "ui_call_id": "ui_call_7f3kR9mW",
+  "status": "dispatching",
+  "queue_position": 1,
+  "message": "Call initiated to Hotel & Palazzo."
 }

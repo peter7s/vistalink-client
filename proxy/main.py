@@ -77,13 +77,36 @@ async def details(hotel_id: str, currency: str | None = None):
 
 
 @app.post("/call")
-async def call(payload: dict):
+async def call(req: schemas.CallRequest):
+    """Dispatch a voice call. Returns immediately with call_id; poll /call/{id}/status."""
+    payload = req.model_dump(exclude_none=True)
     with metrics.record("call_hotel", payload) as row:
         body, headers = await mcp.call_hotel(payload)
         row["status_code"] = int(headers.get("x-upstream-status", 200))
-        row["duration_seconds"] = body.get("duration_seconds", 0)
         _record_headers(row, headers)
-        _record_validation(row, body, schemas.CallResponse)
+        _record_validation(row, body, schemas.CallDispatched)
+        return body
+
+
+@app.get("/call/{call_id}/status")
+async def call_status(call_id: str):
+    with metrics.record("call_hotel_status", {"call_id": call_id}) as row:
+        body, headers = await mcp.get_call_status(call_id)
+        row["status_code"] = int(headers.get("x-upstream-status", 200))
+        _record_headers(row, headers)
+        _record_validation(row, body, schemas.CallStatus)
+        return body
+
+
+@app.get("/call/{call_id}/results")
+async def call_results(call_id: str):
+    with metrics.record("call_hotel_results", {"call_id": call_id}) as row:
+        body, headers = await mcp.get_call_results(call_id)
+        row["status_code"] = int(headers.get("x-upstream-status", 200))
+        if body.get("duration_seconds") is not None:
+            row["duration_seconds"] = body["duration_seconds"]
+        _record_headers(row, headers)
+        _record_validation(row, body, schemas.CallResults)
         return body
 
 

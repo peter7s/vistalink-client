@@ -40,9 +40,24 @@ async def get_hotel_details(hotel_id: str, payload: dict) -> tuple[dict, dict]:
     return _safe_parse(r), headers
 
 
-# DEPRECATED — voice surface pending refactor. Will 404 in live mode.
+# Voice call surface — single dispatcher + async polling lifecycle.
+# Pro/Enterprise tier only; free-tier keys get HTTP 403.
 async def call_hotel(payload: dict) -> tuple[dict, dict]:
     return await _post("/v1/call", payload)
+
+
+async def get_call_status(call_id: str) -> tuple[dict, dict]:
+    async with httpx.AsyncClient(timeout=30) as c:
+        r = await c.get(f"{BASE}/v1/call/{call_id}/status", headers=_headers())
+    headers = dict(r.headers) | {"x-upstream-status": str(r.status_code)}
+    return _safe_parse(r), headers
+
+
+async def get_call_results(call_id: str) -> tuple[dict, dict]:
+    async with httpx.AsyncClient(timeout=30) as c:
+        r = await c.get(f"{BASE}/v1/call/{call_id}/results", headers=_headers())
+    headers = dict(r.headers) | {"x-upstream-status": str(r.status_code)}
+    return _safe_parse(r), headers
 
 
 async def _post(path: str, payload: dict) -> tuple[dict, dict]:

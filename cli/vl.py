@@ -94,9 +94,69 @@ def details(hotel_id: str, currency: str = ""):
 
 
 @app.command()
-def call(hotel_id: str, message: str = "ask about availability"):
+def call(
+    hotel_id: str,
+    phone_number: str = typer.Option(..., "--phone", help="E.164, e.g. +390551234567"),
+    hotel_name: str = typer.Option(..., "--name", help="Hotel name (voice agent identifies itself)"),
+    scenario: str = typer.Option("hotel_negotiation", "--scenario", help="hotel_negotiation | hotel_confirm_booking | hotel_cancel_booking"),
+    language: str = typer.Option("", "--language"),
+    booking_price: float = typer.Option(0.0, "--price"),
+    currency: str = typer.Option("", "--currency"),
+    check_in: str = typer.Option("", "--check-in"),
+    check_out: str = typer.Option("", "--check-out"),
+    confirmation_number: str = typer.Option("", "--conf"),
+    caller_instructions: str = typer.Option("", "--instructions"),
+    wait: bool = typer.Option(False, "--wait", help="Poll until completed and fetch results"),
+):
+    """Dispatch a voice call. Returns call_id immediately. Use --wait to poll-and-fetch."""
+    payload: dict = {"hotel_id": hotel_id, "phone_number": phone_number, "hotel_name": hotel_name, "scenario": scenario}
+    for k, v in {"language": language, "currency": currency, "check_in_date": check_in,
+                 "check_out_date": check_out, "confirmation_number": confirmation_number,
+                 "caller_instructions": caller_instructions}.items():
+        if v:
+            payload[k] = v
+    if booking_price:
+        payload["booking_price"] = booking_price
+
     with _client() as c:
-        r = c.post("/call", json={"hotel_id": hotel_id, "instructions": message})
+        r = c.post("/call", json=payload)
+        body = r.json()
+    print(json.dumps(body, indent=2))
+    call_id = body.get("call_id")
+    if not wait or not call_id:
+        return
+
+    import time
+    print(f"\n[dim]Polling status for {call_id}…[/dim]")
+    while True:
+        with _client() as c:
+            s = c.get(f"/call/{call_id}/status").json()
+        dur = s.get("duration_seconds")
+        dur_str = f" ({dur}s)" if dur else ""
+        print(f"[dim]  status: {s.get('status')}{dur_str}[/dim]")
+        if s.get("status") in ("completed", "failed"):
+            break
+        time.sleep(2)
+
+    print(f"\n[bold]Results:[/bold]")
+    with _client() as c:
+        results = c.get(f"/call/{call_id}/results").json()
+    print(json.dumps(results, indent=2))
+
+
+@app.command(name="call-status")
+def call_status_cmd(call_id: str):
+    """GET /call/{call_id}/status — poll the lifecycle of a dispatched call."""
+    with _client() as c:
+        r = c.get(f"/call/{call_id}/status")
+    print(json.dumps(r.json(), indent=2))
+
+
+@app.command(name="call-results")
+def call_results_cmd(call_id: str):
+    """GET /call/{call_id}/results — fetch transcript + outcome once status is completed."""
+    with _client() as c:
+        r = c.get(f"/call/{call_id}/results")
     print(json.dumps(r.json(), indent=2))
 
 

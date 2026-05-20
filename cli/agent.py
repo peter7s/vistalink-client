@@ -78,14 +78,48 @@ TOOLS = [
     },
     {
         "name": "call_hotel",
-        "description": "Trigger an AI voice call. NOTE: voice flow pending refactor — works in mock mode only.",
+        "description": "Dispatch an AI voice call to a hotel (negotiate, confirm, or cancel). Async — returns a call_id; poll status separately. Pro/Enterprise tier only against live API.",
         "input_schema": {
             "type": "object",
             "properties": {
                 "hotel_id": {"type": "string"},
-                "instructions": {"type": "string"},
+                "phone_number": {"type": "string", "description": "E.164 format, e.g. +390551234567. Fetch from get_hotel_details first."},
+                "hotel_name": {"type": "string", "description": "Used by the voice agent to introduce itself"},
+                "scenario": {"type": "string", "enum": ["hotel_negotiation", "hotel_confirm_booking", "hotel_cancel_booking"]},
+                "guest_first_name": {"type": "string"},
+                "guest_last_name": {"type": "string"},
+                "guest_email": {"type": "string"},
+                "check_in_date": {"type": "string", "description": "YYYY-MM-DD"},
+                "check_out_date": {"type": "string", "description": "YYYY-MM-DD"},
+                "number_of_rooms": {"type": "integer"},
+                "number_of_people": {"type": "integer"},
+                "booking_price": {"type": "number"},
+                "room_type": {"type": "string"},
+                "currency": {"type": "string"},
+                "language": {"type": "string", "description": "e.g. 'en', 'it', 'fr' — voice agent switches TTS/STT accordingly"},
+                "confirmation_number": {"type": "string", "description": "For confirm/cancel scenarios"},
+                "special_requests": {"type": "string"},
+                "caller_instructions": {"type": "string", "description": "Free-form coaching for the voice agent"},
             },
-            "required": ["hotel_id"],
+            "required": ["hotel_id", "phone_number", "hotel_name"],
+        },
+    },
+    {
+        "name": "get_call_status",
+        "description": "Poll the status of a dispatched voice call. Returns dispatching | in_progress | completed | failed.",
+        "input_schema": {
+            "type": "object",
+            "properties": {"call_id": {"type": "string"}},
+            "required": ["call_id"],
+        },
+    },
+    {
+        "name": "get_call_results",
+        "description": "Fetch the final transcript, summary, and structured outcome of a completed call. Returns 409 if not yet completed.",
+        "input_schema": {
+            "type": "object",
+            "properties": {"call_id": {"type": "string"}},
+            "required": ["call_id"],
         },
     },
 ]
@@ -104,6 +138,10 @@ def dispatch(name: str, args: dict) -> dict:
             return c.get(f"/details/{hotel_id}", params=args).json()
         if name == "call_hotel":
             return c.post("/call", json=args).json()
+        if name == "get_call_status":
+            return c.get(f"/call/{args['call_id']}/status").json()
+        if name == "get_call_results":
+            return c.get(f"/call/{args['call_id']}/results").json()
     return {"error": f"unknown tool {name}"}
 
 

@@ -115,17 +115,90 @@ async def get_hotel_details(hotel_id: str, payload: dict) -> tuple[dict, dict]:
     return body, _headers()
 
 
+# In-memory tracker for simulated async call lifecycle.
+# Each call_id maps to {created_at, scenario, payload}. Status is derived from time elapsed.
+_CALL_REGISTRY: dict[str, dict] = {}
+
+
+def _call_status_value(call_id: str) -> str:
+    """Simulate progression: <2s dispatching, 2-6s in_progress, >6s completed."""
+    rec = _CALL_REGISTRY.get(call_id)
+    if not rec:
+        return "completed"  # unknown calls return completed for offline determinism
+    import time
+    elapsed = time.time() - rec["created_at"]
+    if elapsed < 2:
+        return "dispatching"
+    if elapsed < 6:
+        return "in_progress"
+    return "completed"
+
+
 async def call_hotel(payload: dict) -> tuple[dict, dict]:
+    import time
+    call_id = f"call_{uuid.uuid4().hex[:8]}"
+    _CALL_REGISTRY[call_id] = {"created_at": time.time(), "scenario": payload.get("scenario", "hotel_negotiation"), "payload": payload}
     if _mode() == "faker":
         body = {
-            "call_id": uuid.uuid4().hex,
-            "status": "completed",
-            "transcript_url": f"https://api.vistalink.com/calls/{uuid.uuid4().hex}/transcript",
-            "summary": "Negotiated 12% off; late checkout confirmed.",
-            "duration_seconds": round(random.uniform(45, 240), 1),
+            "call_id": call_id,
+            "ui_call_id": f"ui_{call_id}",
+            "status": "dispatching",
+            "queue_position": random.randint(1, 3),
+            "message": f"Call initiated to {payload.get('hotel_name', 'the hotel')}.",
         }
     else:
         body = _load("call_hotel.json")
+        body["call_id"] = call_id
+        body["ui_call_id"] = f"ui_{call_id}"
+    return body, _headers()
+
+
+async def get_call_status(call_id: str) -> tuple[dict, dict]:
+    status = _call_status_value(call_id)
+    if _mode() == "faker":
+        rec = _CALL_REGISTRY.get(call_id, {})
+        import time
+        body = {
+            "call_id": call_id,
+            "status": status,
+            "duration_seconds": round(time.time() - rec.get("created_at", time.time()), 1) if status != "dispatching" else None,
+            "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "transcript": "Agent: Hello, this is the AI booking assistant..." if status in ("in_progress", "completed") else None,
+        }
+    else:
+        body = _load("call_status.json")
+        body["call_id"] = call_id
+        body["status"] = status
+    return body, _headers()
+
+
+async def get_call_results(call_id: str) -> tuple[dict, dict]:
+    status = _call_status_value(call_id)
+    rec = _CALL_REGISTRY.get(call_id, {})
+    scenario = rec.get("payload", {}).get("scenario", "hotel_negotiation")
+    if status != "completed":
+        # Mirror VistaLink's behavior: 409 if not ready. We return the body with status so the proxy can decide.
+        return {"call_id": call_id, "status": status, "error": "not_ready", "message": "Call not complete; poll /status first."}, {**_headers(), "x-upstream-status": "409"}
+    if _mode() == "faker":
+        scenario_outputs = {
+            "hotel_negotiation": {"negotiated_price": round(random.uniform(180, 280), 2), "currency": "EUR", "outcome": "success"},
+            "hotel_confirm_booking": {"confirmation_number": f"BK{uuid.uuid4().hex[:8].upper()}", "outcome": "confirmed"},
+            "hotel_cancel_booking": {"refund_amount": round(random.uniform(0, 300), 2), "currency": "EUR", "outcome": "cancelled"},
+        }
+        body = {
+            "call_id": call_id,
+            "status": "completed",
+            "structured_outputs": scenario_outputs.get(scenario, {"outcome": "success"}),
+            "transcript": "Agent: Hello, Hotel & Palazzo speaking...\nAI: Hello, I'm calling on behalf of...",
+            "recording_url": f"https://api.vistalink.com/calls/{call_id}/recording.mp3",
+            "summary": f"Scenario '{scenario}' completed successfully.",
+            "duration_seconds": round(random.uniform(60, 240), 1),
+            "exchange_count": random.randint(8, 20),
+            "cost_usd": 0.50,
+        }
+    else:
+        body = _load("call_results.json")
+        body["call_id"] = call_id
     return body, _headers()
 
 

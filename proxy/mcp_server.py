@@ -96,11 +96,56 @@ async def get_hotel_details(hotel_id: str, currency: str = "") -> dict:
 
 
 @mcp.tool()
-async def call_hotel(hotel_id: str, instructions: str = "ask about availability") -> dict:
-    """Trigger an AI voice call to a hotel to negotiate or ask questions."""
-    payload = {"hotel_id": hotel_id, "instructions": instructions}
+async def call_hotel(
+    hotel_id: str,
+    phone_number: str,
+    hotel_name: str,
+    scenario: str = "hotel_negotiation",
+    guest_first_name: str = "",
+    guest_last_name: str = "",
+    guest_email: str = "",
+    check_in_date: str = "",
+    check_out_date: str = "",
+    number_of_rooms: int = 0,
+    number_of_people: int = 0,
+    booking_price: float = 0.0,
+    room_type: str = "",
+    currency: str = "",
+    language: str = "",
+    confirmation_number: str = "",
+    special_requests: str = "",
+    caller_instructions: str = "",
+) -> dict:
+    """Dispatch an AI voice call. scenario: hotel_negotiation | hotel_confirm_booking | hotel_cancel_booking.
+    Returns a call_id immediately; poll get_call_status until status=='completed', then get_call_results."""
+    payload: dict = {"hotel_id": hotel_id, "phone_number": phone_number, "hotel_name": hotel_name, "scenario": scenario}
+    for k, v in {"guest_first_name": guest_first_name, "guest_last_name": guest_last_name, "guest_email": guest_email,
+                 "check_in_date": check_in_date, "check_out_date": check_out_date, "room_type": room_type,
+                 "currency": currency, "language": language, "confirmation_number": confirmation_number,
+                 "special_requests": special_requests, "caller_instructions": caller_instructions}.items():
+        if v:
+            payload[k] = v
+    for k, v in {"number_of_rooms": number_of_rooms, "number_of_people": number_of_people, "booking_price": booking_price}.items():
+        if v:
+            payload[k] = v
     body, headers = await backend.call_hotel(payload)
-    _record("call_hotel", payload, body, headers, schemas.CallResponse)
+    _record("call_hotel", payload, body, headers, schemas.CallDispatched)
+    return body
+
+
+@mcp.tool()
+async def get_call_status(call_id: str) -> dict:
+    """Poll the status of a dispatched voice call."""
+    body, headers = await backend.get_call_status(call_id)
+    _record("call_hotel_status", {"call_id": call_id}, body, headers, schemas.CallStatus)
+    return body
+
+
+@mcp.tool()
+async def get_call_results(call_id: str) -> dict:
+    """Fetch the final transcript and structured outcome of a completed call."""
+    body, headers = await backend.get_call_results(call_id)
+    _record("call_hotel_results", {"call_id": call_id}, body, headers, schemas.CallResults)
     return body
 
 
