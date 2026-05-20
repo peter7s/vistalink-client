@@ -117,8 +117,10 @@
     .detail-section { background: #fff; padding: 1.5rem; border-radius: 8px; border: 1px solid #e5e5e5; margin-bottom: 1rem; }
     .detail-section h3 { font-size: 1rem; margin-bottom: 0.75rem; color: #555; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
     .detail-section ul { list-style: none; }
-    .detail-section li { padding: 0.5rem 0; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
+    .detail-section li { padding: 0.75rem 0; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
     .detail-section li:last-child { border: none; }
+    .room-images { display: flex; gap: 0.4rem; margin-top: 0.5rem; overflow-x: auto; padding-bottom: 0.25rem; }
+    .room-images img { width: 110px; height: 80px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
 
     /* States */
     .empty { padding: 3rem; text-align: center; color: #888; font-size: 0.9rem; }
@@ -388,7 +390,9 @@
         const bed = r.bed_summary ? ` · ${escapeHtml(r.bed_summary)}` : '';
         const suite = r.is_suite ? ' <span class="type" style="margin-left:0.4rem;">suite</span>' : '';
         const offer = (r.offers && r.offers[0]) ? ` · from ${r.offers[0].price} ${r.offers[0].currency || ''}${r.offers[0].has_breakfast ? ' (breakfast)' : ''}` : '';
-        return `<li><strong>${escapeHtml(r.name || '')}</strong>${suite}${size}${bed}${offer}</li>`;
+        const imgs = (r.images || []).slice(0, 8);
+        const imgStrip = imgs.length ? `<div class="room-images">${imgs.map(i => `<img src="${i.url}" alt="${escapeHtml(i.caption || i.label || '')}" loading="lazy">`).join('')}</div>` : '';
+        return `<li><strong>${escapeHtml(r.name || '')}</strong>${suite}${size}${bed}${offer}${imgStrip}</li>`;
       }).join('')}</ul></div>` : '';
       const reviews = (h.reviews || []).length ? `<div class="detail-section"><h3>Reviews</h3><ul>${h.reviews.map(r => `<li>${escapeHtml(r.body || '')}${r.rating ? ` <span style="color:#888">(${r.rating}/10)</span>` : ''}</li>`).join('')}</ul></div>` : '';
       const gi = h.guest_insights;

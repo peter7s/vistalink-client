@@ -85,7 +85,11 @@ class Room(BaseModel):
     """Hotel room as returned by /v1/hotels/{id}.rooms — verified live on 2026-05-20.
     NB: docs example uses `room_name`/`room_size_sqm`/`offers` but the live API
     actually returns `name`/`size_sqm`/`is_suite`/`bed_summary` with no `offers`.
-    `offers` may surface when check_in_date/check_out_date query params are set."""
+    `offers` may surface when check_in_date/check_out_date query params are set.
+
+    `images` is NOT returned by VistaLink; the proxy populates it by scanning the
+    top-level `images[]` for URLs containing `/room/<room_name>/` and bucketing them
+    under the matching room. See proxy/main.py:_attach_room_images."""
     room_id: Optional[str] = None
     name: Optional[str] = None
     size_sqm: Optional[float] = None
@@ -93,6 +97,7 @@ class Room(BaseModel):
     bed_summary: Optional[str] = None
     amenities: list[str] = []
     offers: list[RoomOffer] = []
+    images: list[HotelImage] = []
     model_config = ConfigDict(extra="allow")
 
 

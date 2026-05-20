@@ -36,7 +36,10 @@
       "size_sqm": 16.0,
       "is_suite": false,
       "bed_summary": "1 queen bed",
-      "amenities": ["wifi", "minibar"]
+      "amenities": ["wifi", "minibar"],
+      "images": [
+        {"url": "https://hotel-images.vistalink.com/fr/hotelrelaismontmartre/room/Classic%20Double/aaa.jpg", "label": "room", "category": "room"}
+      ]
     },
     {
       "room_id": "22222222-2222-2222-2222-222222222222",
@@ -44,7 +47,10 @@
       "size_sqm": 22.0,
       "is_suite": false,
       "bed_summary": "1 king bed",
-      "amenities": ["wifi", "minibar", "rooftop_view"]
+      "amenities": ["wifi", "minibar", "rooftop_view"],
+      "images": [
+        {"url": "https://hotel-images.vistalink.com/fr/hotelrelaismontmartre/room/Deluxe/bbb.jpg", "label": "room", "category": "room"}
+      ]
     }
   ],
   "reviews": [

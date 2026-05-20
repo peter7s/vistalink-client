@@ -1,5 +1,7 @@
 import os
+import re
 from pathlib import Path
+from urllib.parse import unquote
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
@@ -7,6 +9,29 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 
 from proxy import schemas, metrics
+
+# Matches `/room/<urlencoded_name>/` in VistaLink image URLs.
+_ROOM_URL_PATTERN = re.compile(r"/room/([^/]+)/")
+
+
+def _attach_room_images(body: dict) -> None:
+    """VistaLink returns room photos in the top-level images[] (URL encodes the room
+    name as a path segment). We bucket them onto each rooms[] entry by name match so
+    clients can render per-room thumbnails without parsing URLs themselves."""
+    rooms = body.get("rooms") or []
+    images = body.get("images") or []
+    if not rooms or not images:
+        return
+    room_by_name = {r.get("name"): r for r in rooms if r.get("name")}
+    for img in images:
+        url = img.get("url", "")
+        m = _ROOM_URL_PATTERN.search(url)
+        if not m:
+            continue
+        room_name = unquote(m.group(1))
+        room = room_by_name.get(room_name)
+        if room is not None:
+            room.setdefault("images", []).append(img)
 
 FRONTEND_INDEX = Path(__file__).resolve().parents[1] / "frontend" / "index.html"
 
@@ -72,6 +97,8 @@ async def details(hotel_id: str, currency: str | None = None):
         body, headers = await mcp.get_hotel_details(hotel_id, payload)
         row["status_code"] = int(headers.get("x-upstream-status", 200))
         _record_headers(row, headers)
+        if isinstance(body, dict) and "error" not in body:
+            _attach_room_images(body)
         _record_validation(row, body, schemas.HotelDetails)
         return body
 
