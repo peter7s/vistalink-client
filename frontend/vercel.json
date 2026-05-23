@@ -3,6 +3,8 @@
     { "source": "/search",         "destination": "https://quietly-reference-client.onrender.com/search" },
     { "source": "/chat",           "destination": "https://quietly-reference-client.onrender.com/chat" },
     { "source": "/details/:path*", "destination": "https://quietly-reference-client.onrender.com/details/:path*" },
+    { "source": "/call",           "destination": "https://quietly-reference-client.onrender.com/call" },
+    { "source": "/call/:path*",    "destination": "https://quietly-reference-client.onrender.com/call/:path*" },
     { "source": "/stats",          "destination": "https://quietly-reference-client.onrender.com/stats" }
   ]
 }
