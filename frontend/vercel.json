@@ -5,6 +5,8 @@
     { "source": "/details/:path*", "destination": "https://quietly-reference-client.onrender.com/details/:path*" },
     { "source": "/call",           "destination": "https://quietly-reference-client.onrender.com/call" },
     { "source": "/call/:path*",    "destination": "https://quietly-reference-client.onrender.com/call/:path*" },
-    { "source": "/stats",          "destination": "https://quietly-reference-client.onrender.com/stats" }
+    { "source": "/stats",          "destination": "https://quietly-reference-client.onrender.com/stats" },
+    { "source": "/monitor",        "destination": "https://quietly-reference-client.onrender.com/monitor" },
+    { "source": "/monitor/:path*", "destination": "https://quietly-reference-client.onrender.com/monitor/:path*" }
   ]
 }
