@@ -143,6 +143,52 @@
     .call-pulse { display: inline-block; width: 8px; height: 8px; background: #3b82f6; border-radius: 50%; margin-right: 0.4rem; animation: pulse 1.2s ease-in-out infinite; vertical-align: middle; }
     @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
 
+    /* Monitor view */
+    .monitor-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+    .monitor-title h2 { font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
+    .monitor-title p { font-size: 0.8rem; color: #888; margin-top: 0.15rem; }
+    .monitor-actions { display: flex; gap: 0.5rem; align-items: center; }
+    .live-dot { display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%; margin-right: 0.4rem; animation: pulse 1.5s ease-in-out infinite; }
+    .live-pill { font-size: 0.85rem; color: #555; }
+    .refresh-btn { padding: 0.4rem 0.8rem; background: #fff; border: 1px solid #d4d4d4; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
+    .refresh-btn:hover { background: #f5f5f5; }
+    .stat-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem; margin-bottom: 1.25rem; }
+    .stat-tile { background: #f5f5f0; border-radius: 10px; padding: 1.25rem 1.5rem; }
+    .stat-tile .val { font-size: 2rem; font-weight: 700; line-height: 1; }
+    .stat-tile .label { font-size: 0.85rem; color: #666; margin-top: 0.5rem; }
+    .monitor-filters { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
+    .filter-chip { padding: 0.4rem 0.95rem; background: #fff; border: 1px solid #d4d4d4; border-radius: 999px; cursor: pointer; font-size: 0.85rem; }
+    .filter-chip:hover { background: #f5f5f5; }
+    .filter-chip.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+    .filter-input { padding: 0.45rem 0.75rem; border: 1px solid #d4d4d4; border-radius: 6px; font-size: 0.85rem; min-width: 240px; flex-grow: 1; max-width: 320px; }
+    .filter-select { padding: 0.45rem 0.75rem; border: 1px solid #d4d4d4; border-radius: 6px; font-size: 0.85rem; background: #fff; }
+    .monitor-table { width: 100%; background: #fff; border-radius: 8px; border: 1px solid #e5e5e5; border-collapse: collapse; font-size: 0.85rem; }
+    .monitor-table th { text-align: left; padding: 0.75rem 1rem; color: #666; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; border-bottom: 1px solid #e5e5e5; }
+    .monitor-table td { padding: 0.7rem 1rem; border-bottom: 1px solid #f0f0f0; }
+    .monitor-table tbody tr.row { cursor: pointer; }
+    .monitor-table tbody tr.row:hover { background: #fafafa; }
+    .monitor-table tbody tr.row.expanded { background: #f5f5f0; }
+    .monitor-table tr.detail-row > td { padding: 0; border-bottom: 1px solid #e5e5e5; background: #fafafa; }
+    .status-pill { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; font-family: ui-monospace, monospace; }
+    .status-2xx { background: #d1fae5; color: #065f46; }
+    .status-4xx { background: #fef3c7; color: #92400e; }
+    .status-5xx { background: #fee2e2; color: #991b1b; }
+    .status-unknown { background: #e5e7eb; color: #4b5563; }
+    .method-tag { color: #555; font-family: ui-monospace, monospace; font-size: 0.8rem; }
+    .latency-cell { color: #666; }
+    .latency-cell.slow { color: #b45309; }
+    .latency-cell.very-slow { color: #b91c1c; }
+    .result-cell { color: #444; }
+    .result-cell.error { color: #991b1b; font-weight: 500; }
+    .call-row-id { font-family: ui-monospace, monospace; color: #555; font-size: 0.8rem; }
+    .detail-pane { padding: 1.25rem 1.5rem; }
+    .detail-grid { display: grid; grid-template-columns: 110px 1fr; gap: 0.5rem 1rem; font-size: 0.85rem; margin-bottom: 1rem; }
+    .detail-grid .k { color: #666; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; padding-top: 0.15rem; }
+    .detail-grid .v { color: #1a1a1a; font-family: ui-monospace, monospace; word-break: break-all; }
+    .detail-section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #666; font-weight: 600; margin: 1rem 0 0.5rem; }
+    .json-block { background: #1a1a1a; color: #d4d4d4; padding: 0.75rem 1rem; border-radius: 6px; font-family: ui-monospace, monospace; font-size: 0.75rem; line-height: 1.5; white-space: pre-wrap; word-break: break-word; max-height: 400px; overflow-y: auto; }
+    .empty-monitor { text-align: center; padding: 3rem; color: #888; font-size: 0.9rem; background: #fff; border-radius: 8px; border: 1px solid #e5e5e5; }
+
     /* States */
     .empty { padding: 3rem; text-align: center; color: #888; font-size: 0.9rem; }
     .error { background: #fef2f2; border: 1px solid #fecaca; padding: 1rem; border-radius: 8px; color: #991b1b; font-size: 0.9rem; }
@@ -158,6 +204,7 @@
       <button data-tab="chat">Chat</button>
       <button data-tab="details">Details</button>
       <button data-tab="call">Call</button>
+      <button data-tab="monitor">Monitor</button>
     </nav>
   </header>
 
@@ -202,6 +249,41 @@
         <button type="submit" class="submit" style="margin-top:0.75rem;">Load</button>
       </form>
       <div id="details-results"></div>
+    </section>
+
+    <!-- MONITOR VIEW -->
+    <section id="monitor-view" class="view">
+      <div class="monitor-header">
+        <div class="monitor-title">
+          <h2>〰 API call monitor</h2>
+          <p>All requests to api.vistalink.com · <span id="monitor-window">last 24h</span></p>
+        </div>
+        <div class="monitor-actions">
+          <span class="live-pill"><span class="live-dot"></span>live</span>
+          <button class="refresh-btn" id="monitor-refresh">↻ Refresh</button>
+        </div>
+      </div>
+
+      <div class="stat-tiles" id="monitor-stats">
+        <div class="stat-tile"><div class="val" id="stat-total">—</div><div class="label">total calls</div></div>
+        <div class="stat-tile"><div class="val" id="stat-success">—</div><div class="label">success rate</div></div>
+        <div class="stat-tile"><div class="val" id="stat-attention">—</div><div class="label">needs attention</div></div>
+        <div class="stat-tile"><div class="val" id="stat-latency">—</div><div class="label">avg latency</div></div>
+      </div>
+
+      <div class="monitor-filters">
+        <button class="filter-chip active" data-tool-filter="">All</button>
+        <button class="filter-chip" data-tool-filter="search_hotels">Search</button>
+        <button class="filter-chip" data-tool-filter="chat_about_hotels">Chat</button>
+        <button class="filter-chip" data-tool-filter="get_hotel_details">Details</button>
+        <button class="filter-chip" data-tool-filter="call_hotel">Call</button>
+        <button class="filter-chip" id="errors-only-chip">Errors only</button>
+        <select class="filter-select" id="cid-filter"><option value="">All CIDs</option></select>
+        <select class="filter-select" id="hid-filter"><option value="">All HIDs</option></select>
+        <input class="filter-input" id="text-filter" placeholder="Filter by endpoint or error…">
+      </div>
+
+      <div id="monitor-table-container"></div>
     </section>
 
     <!-- CALL VIEW -->
@@ -276,9 +358,21 @@
       document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === `${tab}-view`));
     }
 
+    // --- CID (sent on every proxy call so the monitor can group by customer) ---
+    const CID_KEY = 'vl_customer_id';
+    function getCID() {
+      let cid = localStorage.getItem(CID_KEY);
+      if (!cid) {
+        cid = `cid_${Math.random().toString(36).slice(2, 10)}`;
+        localStorage.setItem(CID_KEY, cid);
+      }
+      return cid;
+    }
+
     // --- API call helper ---
     async function api(path, opts = {}) {
-      const r = await fetch(path, opts);
+      const headers = { ...(opts.headers || {}), 'X-Customer-Id': getCID() };
+      const r = await fetch(path, { ...opts, headers });
       if (!r.ok) throw { status: r.status, body: await r.text() };
       return r.json();
     }
@@ -646,6 +740,232 @@
     function escapeHtml(s) {
       return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
     }
+
+    // ─── Monitor ────────────────────────────────────────────────────────────────
+    const monitorState = { tool: '', errorsOnly: false, cid: '', hid: '', text: '', expanded: new Set(), pollTimer: null };
+
+    function setMonitorTool(tool) {
+      monitorState.tool = tool;
+      document.querySelectorAll('[data-tool-filter]').forEach(c => c.classList.toggle('active', c.dataset.toolFilter === tool));
+      loadMonitor();
+    }
+    document.querySelectorAll('[data-tool-filter]').forEach(c => c.addEventListener('click', () => setMonitorTool(c.dataset.toolFilter)));
+    document.getElementById('errors-only-chip').addEventListener('click', (e) => {
+      monitorState.errorsOnly = !monitorState.errorsOnly;
+      e.target.classList.toggle('active', monitorState.errorsOnly);
+      loadMonitor();
+    });
+    document.getElementById('cid-filter').addEventListener('change', (e) => { monitorState.cid = e.target.value; loadMonitor(); });
+    document.getElementById('hid-filter').addEventListener('change', (e) => { monitorState.hid = e.target.value; loadMonitor(); });
+    document.getElementById('text-filter').addEventListener('input', (e) => {
+      monitorState.text = e.target.value;
+      clearTimeout(monitorState._textDebounce);
+      monitorState._textDebounce = setTimeout(loadMonitor, 250);
+    });
+    document.getElementById('monitor-refresh').addEventListener('click', loadMonitor);
+
+    async function loadMonitor() {
+      const params = new URLSearchParams();
+      if (monitorState.tool) params.set('tool', monitorState.tool);
+      if (monitorState.cid) params.set('cid', monitorState.cid);
+      if (monitorState.hid) params.set('hid', monitorState.hid);
+      if (monitorState.errorsOnly) params.set('errors_only', 'true');
+      if (monitorState.text) params.set('text', monitorState.text);
+      const qs = params.toString() ? '?' + params.toString() : '';
+      try {
+        const data = await api('/monitor' + qs);
+        renderMonitor(data);
+      } catch (err) {
+        document.getElementById('monitor-table-container').innerHTML = renderError(err, 'Monitor fetch failed.');
+      }
+    }
+
+    function renderMonitor(data) {
+      // Stats
+      const s = data.stats || {};
+      document.getElementById('stat-total').textContent = s.total_calls ?? 0;
+      document.getElementById('stat-success').textContent = (s.success_rate ?? 0) + '%';
+      document.getElementById('stat-attention').textContent = s.needs_attention ?? 0;
+      const lat = s.avg_latency_ms || 0;
+      document.getElementById('stat-latency').textContent = lat >= 1000 ? (lat/1000).toFixed(1) + 's' : Math.round(lat) + 'ms';
+
+      // Populate CID/HID dropdowns (preserving current selection)
+      syncSelect('cid-filter', data.cids || [], monitorState.cid);
+      syncSelect('hid-filter', data.hids || [], monitorState.hid);
+
+      // Table
+      const calls = data.calls || [];
+      const container = document.getElementById('monitor-table-container');
+      if (!calls.length) {
+        container.innerHTML = '<div class="empty-monitor">No calls match the current filters. Make some calls from the other tabs and they\'ll show up here.</div>';
+        return;
+      }
+      const rows = calls.map(c => renderMonitorRow(c)).join('');
+      container.innerHTML = `
+        <table class="monitor-table">
+          <thead><tr>
+            <th>TIME</th><th>CALL</th><th>METHOD</th><th>STATUS</th><th>LATENCY</th><th>CID</th><th>RESULT</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+      container.querySelectorAll('tr.row').forEach(tr => {
+        tr.addEventListener('click', () => toggleDetail(tr.dataset.id));
+      });
+      // Re-expand any previously-open rows after a refresh
+      monitorState.expanded.forEach(id => {
+        const tr = container.querySelector(`tr.row[data-id="${id}"]`);
+        if (tr) expandRow(tr, id);
+      });
+    }
+
+    function syncSelect(id, values, current) {
+      const sel = document.getElementById(id);
+      const placeholder = id === 'cid-filter' ? 'All CIDs' : 'All HIDs';
+      const opts = ['<option value="">' + placeholder + '</option>']
+        .concat(values.map(v => `<option value="${escapeHtml(v)}"${v === current ? ' selected' : ''}>${escapeHtml(v)}</option>`));
+      sel.innerHTML = opts.join('');
+    }
+
+    function renderMonitorRow(c) {
+      const t = new Date((c.ts || 0) * 1000);
+      const time = `${t.getHours().toString().padStart(2,'0')}:${t.getMinutes().toString().padStart(2,'0')}:${t.getSeconds().toString().padStart(2,'0')}`;
+      const tool = c.tool || '';
+      const { method, path } = toolToEndpoint(tool);
+      const status = c.status_code;
+      const statusClass = status == null ? 'status-unknown' : status >= 500 ? 'status-5xx' : status >= 400 ? 'status-4xx' : 'status-2xx';
+      const lat = c.latency_ms || 0;
+      const latClass = lat >= 10000 ? 'very-slow' : lat >= 1000 ? 'slow' : '';
+      const latText = lat >= 1000 ? (lat/1000).toFixed(1) + 's' : Math.round(lat) + 'ms';
+      const isError = (status || 0) >= 400 || c.schema_valid === false;
+      return `
+        <tr class="row" data-id="${c.proxy_call_id}">
+          <td class="call-row-id">${time}</td>
+          <td class="method-tag">${method} <code>${path}</code></td>
+          <td class="method-tag">${method}</td>
+          <td><span class="status-pill ${statusClass}">${status ?? '—'}</span></td>
+          <td class="latency-cell ${latClass}">${latText}</td>
+          <td class="call-row-id">${escapeHtml(c.cid || '')}</td>
+          <td class="result-cell ${isError ? 'error' : ''}">${escapeHtml(c.result_summary || '')}</td>
+        </tr>`;
+    }
+
+    function toolToEndpoint(tool) {
+      switch (tool) {
+        case 'search_hotels':      return { method: 'POST', path: '/v1/search' };
+        case 'chat_about_hotels':  return { method: 'POST', path: '/v1/chat' };
+        case 'get_hotel_details':  return { method: 'GET',  path: '/v1/hotels/{id}' };
+        case 'call_hotel':         return { method: 'POST', path: '/v1/call' };
+        case 'call_hotel_status':  return { method: 'GET',  path: '/v1/call/{id}/status' };
+        case 'call_hotel_results': return { method: 'GET',  path: '/v1/call/{id}/results' };
+        default:                   return { method: '?',    path: tool };
+      }
+    }
+
+    async function toggleDetail(id) {
+      const tr = document.querySelector(`tr.row[data-id="${id}"]`);
+      if (!tr) return;
+      const next = tr.nextElementSibling;
+      if (next && next.classList.contains('detail-row')) {
+        next.remove();
+        tr.classList.remove('expanded');
+        monitorState.expanded.delete(id);
+        return;
+      }
+      monitorState.expanded.add(id);
+      await expandRow(tr, id);
+    }
+
+    async function expandRow(tr, id) {
+      tr.classList.add('expanded');
+      const detail = document.createElement('tr');
+      detail.className = 'detail-row';
+      detail.innerHTML = `<td colspan="7"><div class="detail-pane"><div style="color:#888;font-size:0.85rem;">Loading…</div></div></td>`;
+      tr.after(detail);
+      try {
+        const row = await api(`/monitor/call/${encodeURIComponent(id)}`);
+        detail.querySelector('.detail-pane').innerHTML = renderCallDetail(row);
+      } catch (err) {
+        detail.querySelector('.detail-pane').innerHTML = renderError(err, 'Failed to load call.');
+      }
+    }
+
+    function renderCallDetail(row) {
+      const { method, path } = toolToEndpoint(row.tool || '');
+      const ep = `${method} ${path}`;
+      const status = row.status_code;
+      const statusClass = status == null ? 'status-unknown' : status >= 500 ? 'status-5xx' : status >= 400 ? 'status-4xx' : 'status-2xx';
+      const lat = row.latency_ms || 0;
+      const latText = lat >= 1000 ? (lat/1000).toFixed(2) + 's' : Math.round(lat) + 'ms';
+      const body = row.response_body || {};
+      const callId = body.call_id || row.proxy_call_id;
+      const isCall = row.tool === 'call_hotel_results' || row.tool === 'call_hotel_status' || row.tool === 'call_hotel';
+
+      // For call_hotel_results: inline rich view (audio + transcript + outputs)
+      let richBlock = '';
+      if (row.tool === 'call_hotel_results' && body && !body.error) {
+        const outputs = body.structured_outputs || {};
+        const outputTiles = Object.entries(outputs)
+          .filter(([k, v]) => k !== 'call_summary' && v !== null && v !== undefined && v !== '')
+          .map(([k, v]) => `<div class="call-output"><div class="key">${escapeHtml(k)}</div><div class="val">${escapeHtml(String(v))}</div></div>`).join('');
+        const summary = body.summary || outputs.call_summary || '';
+        const meta = [
+          body.duration_seconds != null ? `${body.duration_seconds}s` : null,
+          body.exchange_count != null ? `${body.exchange_count} exchanges` : null,
+          body.cost_usd != null ? `$${body.cost_usd}` : null,
+        ].filter(Boolean).join(' · ');
+        richBlock = `
+          <div class="detail-section-title">Call outcome</div>
+          ${summary ? `<div class="call-summary">${escapeHtml(summary)}</div>` : ''}
+          ${outputTiles ? `<div class="call-outputs">${outputTiles}</div>` : ''}
+          ${meta ? `<p style="font-size:0.8rem;color:#666;margin-bottom:0.5rem;">${meta}</p>` : ''}
+          ${body.recording_url ? `<audio class="call-recording" controls src="${body.recording_url}"></audio>` : ''}
+          ${body.transcript ? `<div class="detail-section-title">Transcript</div><div class="call-transcript">${escapeHtml(body.transcript)}</div>` : ''}
+        `;
+      }
+
+      const ts = new Date((row.ts || 0) * 1000).toLocaleString();
+      const rateInfo = [
+        row.rate_limit_remaining != null ? `rate: ${row.rate_limit_remaining}` : null,
+        row.monthly_quota_remaining != null ? `quota: ${row.monthly_quota_remaining}` : null,
+      ].filter(Boolean).join(' · ');
+
+      return `
+        <div class="detail-grid">
+          <div class="k">Endpoint</div><div class="v">${ep}</div>
+          <div class="k">Status</div><div class="v"><span class="status-pill ${statusClass}">${status ?? '—'}</span> ${escapeHtml(row.result_summary || '')}</div>
+          <div class="k">Latency</div><div class="v">${latText}</div>
+          <div class="k">Cost</div><div class="v">$${row.estimated_cost_usd ?? 0}</div>
+          <div class="k">Timestamp</div><div class="v">${escapeHtml(ts)}</div>
+          <div class="k">CID</div><div class="v">${escapeHtml(row.cid || '—')}</div>
+          ${row.hid ? `<div class="k">HID</div><div class="v">${escapeHtml(row.hid)}</div>` : ''}
+          ${isCall ? `<div class="k">Call ID</div><div class="v">${escapeHtml(callId)}</div>` : ''}
+          ${row.schema_valid != null ? `<div class="k">Schema</div><div class="v">${row.schema_valid ? '✓ valid' : '✗ invalid: ' + escapeHtml((row.missing_fields || []).join(', '))}</div>` : ''}
+          ${rateInfo ? `<div class="k">Headers</div><div class="v">${escapeHtml(rateInfo)}</div>` : ''}
+        </div>
+        ${richBlock}
+        <div class="detail-section-title">Request payload</div>
+        <pre class="json-block">${escapeHtml(JSON.stringify(row.request, null, 2))}</pre>
+        <div class="detail-section-title">Response body${body && body._truncated ? ` (truncated — original ${body._original_size} chars)` : ''}</div>
+        <pre class="json-block">${escapeHtml(JSON.stringify(row.response_body, null, 2))}</pre>
+      `;
+    }
+
+    // Live polling: refresh every 5s while the Monitor tab is visible
+    function startMonitorPolling() {
+      stopMonitorPolling();
+      loadMonitor();
+      monitorState.pollTimer = setInterval(loadMonitor, 5000);
+    }
+    function stopMonitorPolling() {
+      if (monitorState.pollTimer) { clearInterval(monitorState.pollTimer); monitorState.pollTimer = null; }
+    }
+    // Hook tab switching to (de)activate polling
+    const _origSwitchTab = switchTab;
+    switchTab = function(tab) {
+      _origSwitchTab(tab);
+      if (tab === 'monitor') startMonitorPolling();
+      else stopMonitorPolling();
+    };
   </script>
 </body>
 </html>

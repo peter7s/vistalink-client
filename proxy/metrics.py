@@ -1,5 +1,6 @@
 import json
 import time
+import uuid
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Optional
@@ -7,6 +8,7 @@ from typing import Any, Optional
 from pydantic import BaseModel, ValidationError
 
 LOG_PATH = Path(__file__).resolve().parents[1] / "logs" / "calls.jsonl"
+RESPONSE_BODY_LIMIT = 50_000  # truncate stored response bodies past this many chars
 
 COST_PER_CALL = {
     "search_hotels": 0.01,
@@ -32,12 +34,29 @@ def validate(payload: dict, model: type[BaseModel]) -> tuple[bool, list[str]]:
         return False, missing
 
 
+def _truncate_for_log(body: Any) -> Any:
+    """Cap response bodies stored in the log so a runaway transcript doesn't bloat the file."""
+    try:
+        s = json.dumps(body, default=str)
+    except (TypeError, ValueError):
+        return {"_error": "non-serializable response body"}
+    if len(s) <= RESPONSE_BODY_LIMIT:
+        return body
+    return {"_truncated": True, "_original_size": len(s), "_preview": s[:RESPONSE_BODY_LIMIT]}
+
+
 @contextmanager
-def record(tool: str, request: dict):
-    """Wrap an MCP call. Yields a dict; mutate it then exit the context to log."""
+def record(tool: str, request: dict, cid: str = "default"):
+    """Wrap an MCP call. Yields a dict; mutate it then exit the context to log.
+    Set row['response_body'] and row['hid'] inside the with-block for full monitor support."""
     row: dict[str, Any] = {
+        "proxy_call_id": uuid.uuid4().hex,
         "tool": tool,
+        "cid": cid,
+        "hid": None,                  # mutate to the relevant hotel_id when applicable
         "request": request,
+        "response_body": None,        # mutate to the upstream response
+        "result_summary": None,       # mutate to a short human-readable line
         "ts": time.time(),
         "status_code": None,
         "error_code": None,
@@ -57,6 +76,8 @@ def record(tool: str, request: dict):
             row["estimated_cost_usd"] = estimate_cost(tool, row.get("duration_seconds") or 0.0)
         else:
             row["estimated_cost_usd"] = estimate_cost(tool)
+        if row.get("response_body") is not None:
+            row["response_body"] = _truncate_for_log(row["response_body"])
         LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
         with LOG_PATH.open("a") as f:
             f.write(json.dumps(row, default=str) + "\n")
