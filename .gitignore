@@ -30,3 +30,6 @@ logs/*.jsonl
 
 # Internal docs (drafts, feedback notes, etc. — kept local, shared via Slack)
 docs/
+
+# Personal reference / runbook — kept local
+COMMANDS.md
