@@ -742,65 +742,104 @@
     }
 
     // ─── Monitor ────────────────────────────────────────────────────────────────
-    const monitorState = { tool: '', errorsOnly: false, cid: '', hid: '', text: '', expanded: new Set(), pollTimer: null };
+    const monitorState = {
+      tool: '',
+      errorsOnly: false,
+      cid: '',
+      hid: '',
+      text: '',
+      expanded: new Set(),
+      rows: [],              // in-memory cache of all loaded rows
+      eventSource: null,     // SSE connection
+      knownIds: new Set(),   // dedup guard (initial load vs SSE may overlap on a row)
+    };
 
     function setMonitorTool(tool) {
       monitorState.tool = tool;
       document.querySelectorAll('[data-tool-filter]').forEach(c => c.classList.toggle('active', c.dataset.toolFilter === tool));
-      loadMonitor();
+      renderMonitor();
     }
     document.querySelectorAll('[data-tool-filter]').forEach(c => c.addEventListener('click', () => setMonitorTool(c.dataset.toolFilter)));
     document.getElementById('errors-only-chip').addEventListener('click', (e) => {
       monitorState.errorsOnly = !monitorState.errorsOnly;
       e.target.classList.toggle('active', monitorState.errorsOnly);
-      loadMonitor();
+      renderMonitor();
     });
-    document.getElementById('cid-filter').addEventListener('change', (e) => { monitorState.cid = e.target.value; loadMonitor(); });
-    document.getElementById('hid-filter').addEventListener('change', (e) => { monitorState.hid = e.target.value; loadMonitor(); });
+    document.getElementById('cid-filter').addEventListener('change', (e) => { monitorState.cid = e.target.value; renderMonitor(); });
+    document.getElementById('hid-filter').addEventListener('change', (e) => { monitorState.hid = e.target.value; renderMonitor(); });
     document.getElementById('text-filter').addEventListener('input', (e) => {
       monitorState.text = e.target.value;
       clearTimeout(monitorState._textDebounce);
-      monitorState._textDebounce = setTimeout(loadMonitor, 250);
+      monitorState._textDebounce = setTimeout(renderMonitor, 150);
     });
-    document.getElementById('monitor-refresh').addEventListener('click', loadMonitor);
+    document.getElementById('monitor-refresh').addEventListener('click', () => initialMonitorLoad(true));
 
-    async function loadMonitor() {
-      const params = new URLSearchParams();
-      if (monitorState.tool) params.set('tool', monitorState.tool);
-      if (monitorState.cid) params.set('cid', monitorState.cid);
-      if (monitorState.hid) params.set('hid', monitorState.hid);
-      if (monitorState.errorsOnly) params.set('errors_only', 'true');
-      if (monitorState.text) params.set('text', monitorState.text);
-      const qs = params.toString() ? '?' + params.toString() : '';
+    async function initialMonitorLoad(reload = false) {
       try {
-        const data = await api('/monitor' + qs);
-        renderMonitor(data);
+        const data = await api('/monitor?limit=200');
+        monitorState.rows = data.calls || [];
+        monitorState.knownIds = new Set(monitorState.rows.map(r => r.proxy_call_id));
+        renderMonitor();
       } catch (err) {
         document.getElementById('monitor-table-container').innerHTML = renderError(err, 'Monitor fetch failed.');
       }
     }
 
-    function renderMonitor(data) {
-      // Stats
-      const s = data.stats || {};
-      document.getElementById('stat-total').textContent = s.total_calls ?? 0;
-      document.getElementById('stat-success').textContent = (s.success_rate ?? 0) + '%';
-      document.getElementById('stat-attention').textContent = s.needs_attention ?? 0;
-      const lat = s.avg_latency_ms || 0;
+    function applyFilters(rows) {
+      let r = rows;
+      if (monitorState.tool) {
+        r = r.filter(c => {
+          const t = c.tool || '';
+          return t === monitorState.tool || t.startsWith(monitorState.tool + '_') || t.startsWith(monitorState.tool);
+        });
+      }
+      if (monitorState.cid) r = r.filter(c => c.cid === monitorState.cid);
+      if (monitorState.hid) r = r.filter(c => c.hid === monitorState.hid);
+      if (monitorState.errorsOnly) r = r.filter(c => (c.status_code || 0) >= 400 || c.schema_valid === false);
+      if (monitorState.text) {
+        const t = monitorState.text.toLowerCase();
+        r = r.filter(c => JSON.stringify(c).toLowerCase().includes(t));
+      }
+      return r;
+    }
+
+    function computeStats(rows) {
+      const total = rows.length;
+      if (!total) return { total_calls: 0, success_rate: 0, needs_attention: 0, avg_latency_ms: 0 };
+      const successes = rows.filter(r => (r.status_code || 0) >= 200 && (r.status_code || 0) < 400).length;
+      const attention = rows.filter(r => (r.status_code || 0) >= 400 || r.schema_valid === false).length;
+      const lats = rows.filter(r => r.latency_ms != null).map(r => r.latency_ms);
+      const avg = lats.length ? lats.reduce((a, b) => a + b, 0) / lats.length : 0;
+      return {
+        total_calls: total,
+        success_rate: Math.round(successes / total * 1000) / 10,
+        needs_attention: attention,
+        avg_latency_ms: Math.round(avg * 10) / 10,
+      };
+    }
+
+    function renderMonitor() {
+      const filtered = applyFilters(monitorState.rows);
+      const stats = computeStats(filtered);
+
+      document.getElementById('stat-total').textContent = stats.total_calls;
+      document.getElementById('stat-success').textContent = stats.success_rate + '%';
+      document.getElementById('stat-attention').textContent = stats.needs_attention;
+      const lat = stats.avg_latency_ms;
       document.getElementById('stat-latency').textContent = lat >= 1000 ? (lat/1000).toFixed(1) + 's' : Math.round(lat) + 'ms';
 
-      // Populate CID/HID dropdowns (preserving current selection)
-      syncSelect('cid-filter', data.cids || [], monitorState.cid);
-      syncSelect('hid-filter', data.hids || [], monitorState.hid);
+      // Distinct CIDs / HIDs from the full row cache (unfiltered)
+      const cids = Array.from(new Set(monitorState.rows.map(r => r.cid).filter(Boolean))).sort();
+      const hids = Array.from(new Set(monitorState.rows.map(r => r.hid).filter(Boolean))).sort();
+      syncSelect('cid-filter', cids, monitorState.cid);
+      syncSelect('hid-filter', hids, monitorState.hid);
 
-      // Table
-      const calls = data.calls || [];
       const container = document.getElementById('monitor-table-container');
-      if (!calls.length) {
-        container.innerHTML = '<div class="empty-monitor">No calls match the current filters. Make some calls from the other tabs and they\'ll show up here.</div>';
+      if (!filtered.length) {
+        container.innerHTML = '<div class="empty-monitor">No calls match the current filters. Make some calls from the other tabs and they\'ll appear here live.</div>';
         return;
       }
-      const rows = calls.map(c => renderMonitorRow(c)).join('');
+      const rows = filtered.slice(0, 200).map(c => renderMonitorRow(c)).join('');
       container.innerHTML = `
         <table class="monitor-table">
           <thead><tr>
@@ -811,11 +850,19 @@
       container.querySelectorAll('tr.row').forEach(tr => {
         tr.addEventListener('click', () => toggleDetail(tr.dataset.id));
       });
-      // Re-expand any previously-open rows after a refresh
+      // Re-expand any previously-open rows after re-render
       monitorState.expanded.forEach(id => {
         const tr = container.querySelector(`tr.row[data-id="${id}"]`);
         if (tr) expandRow(tr, id);
       });
+    }
+
+    function flashRow(id) {
+      const tr = document.querySelector(`tr.row[data-id="${id}"]`);
+      if (!tr) return;
+      tr.style.transition = 'background-color 1.2s ease-out';
+      tr.style.backgroundColor = '#dbeafe';
+      setTimeout(() => { tr.style.backgroundColor = ''; }, 1200);
     }
 
     function syncSelect(id, values, current) {
@@ -950,21 +997,44 @@
       `;
     }
 
-    // Live polling: refresh every 5s while the Monitor tab is visible
-    function startMonitorPolling() {
-      stopMonitorPolling();
-      loadMonitor();
-      monitorState.pollTimer = setInterval(loadMonitor, 5000);
+    // Live updates: SSE pushes new calls as they happen. Open on tab enter, close on leave.
+    function startMonitorStream() {
+      stopMonitorStream();
+      initialMonitorLoad();   // one-shot fetch to populate existing history
+      try {
+        const es = new EventSource('/monitor/stream');
+        monitorState.eventSource = es;
+        es.onmessage = (e) => {
+          if (!e.data) return;
+          let row;
+          try { row = JSON.parse(e.data); } catch { return; }
+          if (!row.proxy_call_id || monitorState.knownIds.has(row.proxy_call_id)) return;
+          monitorState.knownIds.add(row.proxy_call_id);
+          monitorState.rows.unshift(row);
+          if (monitorState.rows.length > 500) monitorState.rows.length = 500;
+          renderMonitor();
+          flashRow(row.proxy_call_id);
+        };
+        es.onerror = () => {
+          // EventSource auto-reconnects with backoff — nothing to do here besides log.
+          console.warn('[monitor] SSE connection error; browser will retry automatically');
+        };
+      } catch (err) {
+        console.error('[monitor] EventSource init failed', err);
+      }
     }
-    function stopMonitorPolling() {
-      if (monitorState.pollTimer) { clearInterval(monitorState.pollTimer); monitorState.pollTimer = null; }
+    function stopMonitorStream() {
+      if (monitorState.eventSource) {
+        monitorState.eventSource.close();
+        monitorState.eventSource = null;
+      }
     }
-    // Hook tab switching to (de)activate polling
+    // Hook tab switching to (de)activate the stream
     const _origSwitchTab = switchTab;
     switchTab = function(tab) {
       _origSwitchTab(tab);
-      if (tab === 'monitor') startMonitorPolling();
-      else stopMonitorPolling();
+      if (tab === 'monitor') startMonitorStream();
+      else stopMonitorStream();
     };
   </script>
 </body>

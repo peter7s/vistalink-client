@@ -7,8 +7,26 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, ValidationError
 
+from proxy import pubsub
+
 LOG_PATH = Path(__file__).resolve().parents[1] / "logs" / "calls.jsonl"
 RESPONSE_BODY_LIMIT = 50_000  # truncate stored response bodies past this many chars
+
+
+def _summary_for_broadcast(row: dict) -> dict:
+    """Slim row sent to SSE subscribers — matches the monitor table columns."""
+    return {
+        "proxy_call_id": row.get("proxy_call_id"),
+        "ts": row.get("ts"),
+        "tool": row.get("tool"),
+        "cid": row.get("cid"),
+        "hid": row.get("hid"),
+        "status_code": row.get("status_code"),
+        "latency_ms": row.get("latency_ms"),
+        "estimated_cost_usd": row.get("estimated_cost_usd"),
+        "result_summary": row.get("result_summary"),
+        "schema_valid": row.get("schema_valid"),
+    }
 
 COST_PER_CALL = {
     "search_hotels": 0.01,
@@ -81,6 +99,8 @@ def record(tool: str, request: dict, cid: str = "default"):
         LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
         with LOG_PATH.open("a") as f:
             f.write(json.dumps(row, default=str) + "\n")
+        # Live push to any /monitor/stream subscribers
+        pubsub.broadcast(_summary_for_broadcast(row))
 
 
 def rollup() -> dict:

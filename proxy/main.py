@@ -1,14 +1,16 @@
+import asyncio
+import json
 import os
 import re
 from pathlib import Path
 from urllib.parse import unquote
 
 from fastapi import FastAPI, Header, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
-from proxy import schemas, metrics, monitor
+from proxy import schemas, metrics, monitor, pubsub
 
 # Matches `/room/<urlencoded_name>/` in VistaLink image URLs.
 _ROOM_URL_PATTERN = re.compile(r"/room/([^/]+)/")
@@ -178,6 +180,34 @@ def monitor_detail(proxy_call_id: str):
     if row is None:
         raise HTTPException(status_code=404, detail="call not found")
     return row
+
+
+@app.get("/monitor/stream")
+async def monitor_stream():
+    """Server-Sent Events — pushes one event per recorded call as it happens.
+    Frontend opens this with EventSource when the Monitor tab is active and
+    closes it on tab switch. No polling required."""
+    async def event_gen():
+        q = pubsub.add_subscriber()
+        try:
+            while True:
+                try:
+                    event = await asyncio.wait_for(q.get(), timeout=25.0)
+                    yield f"data: {json.dumps(event, default=str)}\n\n"
+                except asyncio.TimeoutError:
+                    # SSE comment line — keeps proxies/load balancers from closing the connection.
+                    yield ": keepalive\n\n"
+        finally:
+            pubsub.remove_subscriber(q)
+    return StreamingResponse(
+        event_gen(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache, no-transform",
+            "X-Accel-Buffering": "no",  # tells nginx-style proxies not to buffer the stream
+            "Connection": "keep-alive",
+        },
+    )
 
 
 @app.get("/", include_in_schema=False)
