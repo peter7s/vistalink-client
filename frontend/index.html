@@ -552,7 +552,9 @@
     function renderChatHotels(hotels) {
       if (!hotels || !hotels.length) return '';
       const cards = hotels.map(h => {
-        const img = (h.images && h.images[0]) ? h.images[0].url : '';
+        // VistaLink's chat response uses hero_image_url for the per-hotel thumbnail
+        // (images[] is empty by design here; populated only on search/details).
+        const img = h.hero_image_url || ((h.images && h.images[0]) ? h.images[0].url : '');
         const star = h.star_rating ? `★ ${h.star_rating}` : '';
         const review = h.review_score ? `${h.review_score}/10` : '';
         const meta = [star, review, h.city].filter(Boolean).join(' · ');
