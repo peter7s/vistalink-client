@@ -109,7 +109,13 @@
     .chat-hotels { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.5rem; margin-top: 0.75rem; }
     .chat-hotel-card { background: #f5f5f5; border: 1px solid #e5e5e5; border-radius: 6px; overflow: hidden; cursor: pointer; transition: transform 0.1s; }
     .chat-hotel-card:hover { transform: translateY(-1px); background: #eee; }
-    .chat-hotel-card img { width: 100%; height: 110px; object-fit: cover; background: #ddd; display: block; }
+    .chat-hotel-thumb { position: relative; width: 100%; height: 110px; background: linear-gradient(135deg, #f0f0f0 0%, #d8d8d8 100%); overflow: hidden; }
+    .chat-hotel-thumb::before {
+      content: '🏨'; position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; opacity: 0.35;
+    }
+    .chat-hotel-thumb img { position: relative; width: 100%; height: 100%; object-fit: cover; display: block; }
     .chat-hotel-card-body { padding: 0.5rem 0.7rem; }
     .chat-hotel-card-body h4 { font-size: 0.8rem; font-weight: 600; margin-bottom: 0.15rem; line-height: 1.25; }
     .chat-hotel-card-body p { font-size: 0.7rem; color: #666; }
@@ -550,9 +556,14 @@
         const star = h.star_rating ? `★ ${h.star_rating}` : '';
         const review = h.review_score ? `${h.review_score}/10` : '';
         const meta = [star, review, h.city].filter(Boolean).join(' · ');
+        // Always render the .chat-hotel-thumb wrapper — its ::before draws the
+        // 🏨 placeholder. The <img> sits on top; if it loads, it covers the
+        // placeholder; if the URL is missing or fails, the placeholder stays.
         return `
           <div class="chat-hotel-card" data-id="${h.hotel_id}">
-            ${img ? `<img src="${img}" loading="lazy" alt="">` : ''}
+            <div class="chat-hotel-thumb">
+              ${img ? `<img src="${img}" loading="lazy" alt="" onerror="this.remove()">` : ''}
+            </div>
             <div class="chat-hotel-card-body">
               <h4>${escapeHtml(h.name || '')}</h4>
               <p>${escapeHtml(meta)}</p>
