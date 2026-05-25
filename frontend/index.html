@@ -106,6 +106,13 @@
     }
     .hotel-ref:hover { background: #d2e3fc; }
     .meta { font-size: 0.8rem; color: #888; margin-top: 1rem; }
+    .chat-hotels { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.5rem; margin-top: 0.75rem; }
+    .chat-hotel-card { background: #f5f5f5; border: 1px solid #e5e5e5; border-radius: 6px; overflow: hidden; cursor: pointer; transition: transform 0.1s; }
+    .chat-hotel-card:hover { transform: translateY(-1px); background: #eee; }
+    .chat-hotel-card img { width: 100%; height: 110px; object-fit: cover; background: #ddd; display: block; }
+    .chat-hotel-card-body { padding: 0.5rem 0.7rem; }
+    .chat-hotel-card-body h4 { font-size: 0.8rem; font-weight: 600; margin-bottom: 0.15rem; line-height: 1.25; }
+    .chat-hotel-card-body p { font-size: 0.7rem; color: #666; }
 
     /* Details */
     .detail-header { background: #fff; padding: 2rem; border-radius: 8px; border: 1px solid #e5e5e5; margin-bottom: 1rem; }
@@ -500,10 +507,12 @@
 
       try {
         const body = await api('/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-        pending.innerHTML = `<span class="role-tag">assistant</span>${formatChatMessage(body.message || '')}`;
-        pending.querySelectorAll('.hotel-ref').forEach(a => a.addEventListener('click', (ev) => {
+        const prose = formatChatMessage(body.message || '');
+        const cards = renderChatHotels(body.hotels || []);
+        pending.innerHTML = `<span class="role-tag">assistant</span>${prose}${cards}`;
+        pending.querySelectorAll('.hotel-ref, .chat-hotel-card').forEach(el => el.addEventListener('click', (ev) => {
           ev.preventDefault();
-          loadDetails(a.dataset.id);
+          loadDetails(el.dataset.id);
         }));
         if (body.session_id) {
           chatSession = body.session_id;
@@ -519,6 +528,8 @@
 
     function formatChatMessage(msg) {
       // Replace <!--hotel:UUID--> with clickable pills, escape the rest.
+      // VistaLink stopped emitting these markers in 2026-05 (they now populate
+      // hotels[] instead) — kept for backwards compat with older sessions.
       const parts = [];
       const re = /<!--hotel:([^>]+)-->/g;
       let last = 0, m;
@@ -530,6 +541,25 @@
       parts.push(escapeHtml(msg.slice(last)));
       // Render basic markdown bold (**text**) — chat responses use it heavily.
       return parts.join('').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    }
+
+    function renderChatHotels(hotels) {
+      if (!hotels || !hotels.length) return '';
+      const cards = hotels.map(h => {
+        const img = (h.images && h.images[0]) ? h.images[0].url : '';
+        const star = h.star_rating ? `★ ${h.star_rating}` : '';
+        const review = h.review_score ? `${h.review_score}/10` : '';
+        const meta = [star, review, h.city].filter(Boolean).join(' · ');
+        return `
+          <div class="chat-hotel-card" data-id="${h.hotel_id}">
+            ${img ? `<img src="${img}" loading="lazy" alt="">` : ''}
+            <div class="chat-hotel-card-body">
+              <h4>${escapeHtml(h.name || '')}</h4>
+              <p>${escapeHtml(meta)}</p>
+            </div>
+          </div>`;
+      }).join('');
+      return `<div class="chat-hotels">${cards}</div>`;
     }
 
     // --- Details ---
